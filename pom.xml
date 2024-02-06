@@ -149,22 +149,22 @@
                         </executions>
                     </plugin>
                     <!-- Javadoc -->
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <configuration>
-                            <charset>UTF-8</charset>
-<!--                            <skip>true</skip>-->
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+<!--                    <plugin>-->
+<!--                        <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                        <version>3.0.1</version>-->
+<!--                        <configuration>-->
+<!--                            <charset>UTF-8</charset>-->
+<!--&lt;!&ndash;                            <skip>true</skip>&ndash;&gt;-->
+<!--                        </configuration>-->
+<!--                        <executions>-->
+<!--                            <execution>-->
+<!--                                <phase>package</phase>-->
+<!--                                <goals>-->
+<!--                                    <goal>jar</goal>-->
+<!--                                </goals>-->
+<!--                            </execution>-->
+<!--                        </executions>-->
+<!--                    </plugin>-->
                 </plugins>
             </build>
             <distributionManagement>
