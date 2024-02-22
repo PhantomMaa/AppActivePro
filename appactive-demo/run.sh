@@ -14,16 +14,33 @@
 # limitations under the License.
 #
 
-docker-compose build
-docker-compose up -d nacos mysql
-sleep 20s
-docker-compose up -d storage storage-unit
-sleep 15s
-docker-compose up -d product product-unit
-sleep 15s
-docker-compose up -d frontend frontend-unit
-sleep 3s
-docker-compose up -d gateway
+cmd=$1
 
-# docker-compose up --no-recreate
-# docker-compose down
+if [ $cmd == 'build' ]
+then
+  docker-compose build
+fi
+
+if [ $cmd == 'pre-start' ]
+then
+  docker-compose up -d nacos mysql
+fi
+
+if [ $cmd == 'start' ]
+then
+  cd ../appactive-portal
+  sh baseline.sh 2 NACOS
+
+  cd ../appactive-demo
+  docker-compose up -d
+fi
+
+if [ $cmd == 'stop' ]
+then
+  docker-compose stop storage storage-unit product product-unit frontend frontend-unit gateway
+fi
+
+if [ $cmd == 'destory' ]
+then
+  docker-compose down
+fi
