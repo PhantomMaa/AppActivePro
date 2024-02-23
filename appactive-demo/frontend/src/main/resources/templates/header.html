@@ -117,25 +117,18 @@
             elem.addClass("active");
         }
 
-        function refresh(routerIdNew, rpcTypeNew){
+        function refresh(routerIdNew){
           let routerId = routerIdNew === undefined ? getRouterId() : routerIdNew;
-          let rpcType = rpcTypeNew === undefined ? getRpcType() : rpcTypeNew;
-	        let element = document.getElementById("routerId");
-	        element.value = routerId;
-	        element = document.getElementById("rpcType");
-          element.value = rpcType;
-          document.cookie = ("rpc_type="+rpcType+"; path=/");
+          let element = document.getElementById("routerId");
+          element.value = routerId;
           document.cookie = ("r_id="+routerId+"; path=/");
         }
 
         function setMeta() {
 	        let element = document.getElementById("routerId");
 	        let routerId = element.value;
-	        let element1 = document.getElementById("rpcType");
-          let rpcType = element1.value;
-          console.log(routerId+","+rpcType)
             // 整个网站生效 用 /
-	        refresh(routerId, rpcType);
+	        refresh(routerId);
         }
 
         function getRouterId() {
@@ -147,17 +140,6 @@
               routerId = 24
             }
             return routerId;
-        }
-
-        function getRpcType() {
-            let rpcType = getQuery("rpc_type")
-            if (rpcType === undefined){
-                rpcType = getCookie("rpc_type")
-            }
-            if (rpcType === undefined){
-                rpcType = "Dubbo"
-            }
-            return rpcType;
         }
 
         function getCookie(cname){
@@ -191,14 +173,9 @@
                     <a class="navbar-brand" href="#">Appactive Demo</a>
                 </div>
                 <ul class="nav">
-                    <li id="listProduct"><a class="nav-link" th:href="@{'/listProduct'}">列表(普通服务)</a></li>
-                    <li id="detailProduct"><a class="nav-link" th:href="@{'/detailProduct'}">详情(单元服务)</a></li>
+                    <li id="listProduct"><a class="nav-link" th:href="@{'/listProduct'}">商品列表(普通服务)</a></li>
+                    <li id="detailProduct"><a class="nav-link" th:href="@{'/detailProduct'}">商品详情(单元服务)</a></li>
                     <li id="buyProduct"><a class="nav-link" th:href="@{'/buyProduct'}">减库存(中心服务)</a></li>
-<!--                    <li><input type="text" class="form-control" placeholder="Rpc类型" id="rpcType" onblur="setMeta()"></li>-->
-                    <select name="rpcType" id="rpcType" class="form-control" style="width:150px" onchange="setMeta()">
-                        <option value="Dubbo">Dubbo</option>
-                        <option value="SpringCloud">SpringCloud</option>
-                    </select>
                     <li><input type="text" class="form-control" placeholder="路由ID" id="routerId" onchange="setMeta()" onblur="setMeta()"></li>
                 </ul>
             </div>

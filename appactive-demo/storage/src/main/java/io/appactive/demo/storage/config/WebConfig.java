@@ -16,19 +16,13 @@
 
 package io.appactive.demo.storage.config;
 
-import io.appactive.rpc.springcloud.common.consumer.ConsumerAutoConfig;
-import io.appactive.rpc.springcloud.common.provider.CenterServiceFilter;
-import io.appactive.rpc.springcloud.common.provider.UnitServiceFilter;
-import io.appactive.rpc.springcloud.nacos.NacosAutoConfig;
 import io.appactive.servlet.RequestFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 
 @Configuration
-@Import({NacosAutoConfig.class})
 public class WebConfig {
     @Bean
     public FilterRegistrationBean<RequestFilter> appActiveWebFilter() {
@@ -39,12 +33,4 @@ public class WebConfig {
         return filterRegistrationBean;
     }
 
-    @Bean
-    public FilterRegistrationBean<CenterServiceFilter> appActiveCenterServiceFilter() {
-        FilterRegistrationBean<CenterServiceFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        CenterServiceFilter reqResFilter = new CenterServiceFilter();
-        filterRegistrationBean.setFilter(reqResFilter);
-        filterRegistrationBean.addUrlPatterns("/buy/*");
-        return filterRegistrationBean;
-    }
 }

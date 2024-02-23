@@ -17,10 +17,8 @@
 package io.appactive.demo.frontend.controller;
 
 import com.alibaba.fastjson.JSON;
-import io.appactive.demo.common.RPCType;
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.springcloud.ProductDAO;
 import io.appactive.demo.frontend.service.FrontEndService;
 import io.appactive.java.api.base.AppContextClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +38,6 @@ public class FrontController {
 
     @Autowired
     private FrontEndService frontEndService;
-
-    @Resource
-    private ProductDAO productDAO;
 
     @Value("${spring.application.name}")
     private String appName;
@@ -125,12 +119,9 @@ public class FrontController {
     }
 
     @GetMapping("/listProduct")
-    public String listProduct(@CookieValue(value = "rpc_type", required = false, defaultValue = "Dubbo") RPCType rpcType,
-                              @RequestParam(required = false, defaultValue = "feign") String call,
-                              Model model) {
+    public String listProduct(Model model) {
         // normal
-        ResultHolder<List<Product>> resultHolder = rpcType == RPCType.Dubbo ?
-                frontEndService.list() : (call.equals("feign") ? productDAO.list() : productDAO.listTemplate());
+        ResultHolder<List<Product>> resultHolder = frontEndService.list();
 
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("products", resultHolder.getResult());
@@ -140,13 +131,11 @@ public class FrontController {
     }
 
     @GetMapping(value = "/detailProduct")
-    public String detailProduct(@CookieValue(value = "rpc_type", required = false, defaultValue = "Dubbo") RPCType rpcType,
-                                @RequestParam(required = false, defaultValue = "12") String id,
+    public String detailProduct(@RequestParam(required = false, defaultValue = "12") String id,
                                 @RequestParam(required = false, defaultValue = "false") Boolean hidden,
-                                @RequestParam(required = false, defaultValue = "feign") String call,
                                 Model model) {
         // unit
-        ResultHolder<Product> resultHolder = getProductResultHolder(rpcType, id, hidden, call);
+        ResultHolder<Product> resultHolder = getProductResultHolder(id, hidden);
 
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("product", resultHolder.getResult());
@@ -155,28 +144,15 @@ public class FrontController {
         return "detail.html";
     }
 
-    private ResultHolder<Product> getProductResultHolder(RPCType rpcType, String id, Boolean hidden, String call) {
-        ResultHolder<Product> resultHolder;
-        if (rpcType == RPCType.Dubbo) {
-            resultHolder = hidden ? frontEndService.detailHidden(id) : frontEndService.detail(AppContextClient.getRouteId(), id);
-        } else {
-            resultHolder = hidden ? productDAO.detailHidden(id) :
-                    (call.equals("feign") ? productDAO.detail(AppContextClient.getRouteId(), id) : productDAO.detailTemplate(AppContextClient.getRouteId(), id));
-        }
-        return resultHolder;
+    private ResultHolder<Product> getProductResultHolder(String id, Boolean hidden) {
+        return hidden ? frontEndService.detailHidden(id) : frontEndService.detail(AppContextClient.getRouteId(), id);
     }
 
     @RequestMapping("/buyProduct")
-    public String buyProduct(@CookieValue(value = "rpc_type", required = false, defaultValue = "Dubbo") RPCType rpcType,
-                             @RequestParam(required = false, defaultValue = "12") String pId,
-                             @RequestParam(required = false, defaultValue = "1") Integer number,
-                             @RequestParam(required = false, defaultValue = "feign") String call, Model model) {
-        // unit
-        ResultHolder<String> resultHolder = rpcType == RPCType.Dubbo ?
-                frontEndService.buy(pId, number) : productDAO.buy(AppContextClient.getRouteId(), pId, number);
-
-        ResultHolder<Product> productHolder = getProductResultHolder(rpcType, pId, false, call);
-
+    public String buyProduct(@RequestParam(required = false, defaultValue = "12") String pId,
+                             @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
+        ResultHolder<String> resultHolder = frontEndService.buy(pId, number);
+        ResultHolder<Product> productHolder = getProductResultHolder(pId, false);
 
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("msg", resultHolder.getResult());

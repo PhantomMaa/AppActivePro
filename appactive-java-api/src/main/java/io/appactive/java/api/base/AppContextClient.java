@@ -23,7 +23,7 @@ public class AppContextClient {
      * 存放单元信息在线程上下文中
      * 子线程也能拿到信息
      */
-    private static final ThreadLocal<String> UNIT_INFO = new ThreadLocal<String>();
+    private static final ThreadLocal<String> UNIT_INFO = new ThreadLocal<>();
 
 
     /**
@@ -31,7 +31,7 @@ public class AppContextClient {
      * @param routeId 分流 id
      */
     public static void setUnitContext(String routeId) {
-        if (routeId == null || "".equals(routeId)) {
+        if (routeId == null || routeId.isEmpty()) {
             routeId = null;
         }
 

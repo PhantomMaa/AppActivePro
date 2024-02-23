@@ -17,8 +17,6 @@
 package io.appactive.demo.frontend.config;
 
 import feign.codec.Decoder;
-import io.appactive.rpc.springcloud.common.consumer.ConsumerAutoConfig;
-import io.appactive.rpc.springcloud.nacos.NacosAutoConfig;
 import io.appactive.servlet.RequestFilter;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +27,11 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 
 @Configuration
-@Import({ConsumerAutoConfig.class,NacosAutoConfig.class})
 public class WebConfig {
     @Bean
     public FilterRegistrationBean<RequestFilter> appActiveFilter() {

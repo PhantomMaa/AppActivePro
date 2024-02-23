@@ -32,7 +32,6 @@
         <module>client-bridge-rpc-apache-dubbo</module>
         <module>client-bridge-db-mysql</module>
         <module>client-bridge-rpc-base</module>
-        <module>client-bridge-rpc-springcloud</module>
     </modules>
 
     <properties>
