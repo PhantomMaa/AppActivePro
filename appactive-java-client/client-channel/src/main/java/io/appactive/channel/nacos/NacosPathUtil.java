@@ -1,7 +1,7 @@
 package io.appactive.channel.nacos;
 
 import io.appactive.channel.PathUtil;
-import io.appactive.channel.file.RulePropertyConstant;
+import io.appactive.channel.RulePropertyConstant;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.support.log.LogUtil;
 import io.appactive.support.sys.JvmPropertyUtil;

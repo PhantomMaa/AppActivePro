@@ -1,13 +1,14 @@
 ---
 layout: default
 parent: 中文文档
-nav_order: 8
+nav_order: 4
 ---
-# 开发指南(文件)
+# 开发指南(Naocs)
 
 ---
 
 ## 一、数据面
+
 ### 1.1 网关（Gateway）：Nginx
 
 **前置条件**
@@ -59,7 +60,8 @@ upstream %VAR_APP_ID%_%UNIT_FLAG_N%_default {
 - UNIT_FLAG_N: 每个单元的单元标
 - VAR_BACKEND_IP_LIST: 对应单元的后端应用IP
 
-### 1.2 微服务（RPC）：Dubbo
+### 2.1 微服务（RPC）：Dubbo
+
 **前置条件**
 
 - 需要你的应用服务基于 Java 实现，并且以 Dubbo 实现服务调用
@@ -173,7 +175,120 @@ rsActive 的 候选 value 有:
 最后，引入单元保护过滤器, 以springboot为例，在 application.properties 中加入一行:
 `dubbo.provider.filter=unitProtectionFilter`
 
-### 1.3 数据库（DB）：Mysql
+### 2.2 微服务（RPC）：SpringCloud
+
+**前置条件**
+
+- 需要你的应用服务基于 Java 实现，并且以 SpringCloud 实现服务调用
+- 负载均衡支持 Ribbon，暂不支持 SpringCloudBalancer
+- 支持声明式http客户端：Feign 和 RestTemplate，暂不支持 原始Http客户端如 OkHttp 和 HttpClient
+
+#### 入口应用
+
+同 Dubbo
+
+#### 所有应用
+
+**改造步骤**
+
+1. 在 provider 和 consumer 都引入 maven 依赖
+
+    ```
+    <dependency>
+        <groupId>com.alibaba.msha</groupId>
+        <artifactId>client-bridge-rpc-springcloud-common</artifactId>
+        <version>0.2.1</version>
+    </dependency>
+    ```
+   
+    对于 使用 Nacos 作为注册中心的应用，还应引入
+    ```
+    <dependency>
+        <groupId>com.alibaba.msha</groupId>
+        <artifactId>client-bridge-rpc-springcloud-nacos</artifactId>
+        <version>0.2.1</version>
+    </dependency>
+    ```
+    
+    对于 使用 Eureka 作为注册中心的应用，还应引入
+    ```
+    <dependency>
+       <groupId>com.alibaba.msha</groupId>
+       <artifactId>client-bridge-rpc-springcloud-eureka</artifactId>
+       <version>0.2.1</version>
+    </dependency>
+    ```
+    
+    注意，不同的注册中心不能同时使用。
+    
+    然后引入自动配置
+    
+    `@Import({ConsumerAutoConfig.class, NacosAutoConfig.class})`
+
+2. 在 consumer 的 maven 中引入切面
+    ```
+    <build>
+        <plugins>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.11</version>
+                <configuration>
+                    <aspectLibraries>
+                        <aspectLibrary>
+                            <groupId>com.alibaba.msha</groupId>
+                            <artifactId>client-bridge-rpc-springcloud-common</artifactId>
+                        </aspectLibrary>
+                    </aspectLibraries>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <complianceLevel>1.8</complianceLevel>
+                    <forceAjcCompile>true</forceAjcCompile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>compileId</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    ```
+    植入多活寻址逻辑
+
+3. 在 provider 中定义不同uri的属性，支持 ant 模式的 uri，举例
+
+    ```
+        @Bean
+        public FilterRegistrationBean<UnitServiceFilter> appActiveUnitServiceFilter() {
+            FilterRegistrationBean<UnitServiceFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+            UnitServiceFilter reqResFilter = new UnitServiceFilter();
+            filterRegistrationBean.setFilter(reqResFilter);
+            filterRegistrationBean.addUrlPatterns("/detailHidden/*","/detail/*");
+            return filterRegistrationBean;
+        }
+    
+        @Bean
+        public FilterRegistrationBean<CenterServiceFilter> appActiveCenterServiceFilter() {
+            FilterRegistrationBean<CenterServiceFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+            CenterServiceFilter reqResFilter = new CenterServiceFilter();
+            filterRegistrationBean.setFilter(reqResFilter);
+            filterRegistrationBean.addUrlPatterns("/buy/*");
+            return filterRegistrationBean;
+        }
+    ```
+    不同服务类型同 Dubbo，具体如下
+ 
+    - center: 中心服务，强一致的业务（例如库存、金额等）的服务，强制路由到中心机房，使用 `CenterServiceFilter` 过滤
+    - unit: 单元服务，基于规则，仅在本单元路由的服务，使用 `UnitServiceFilter` 过滤
+    - normal: 普通服务，不做多活改造，使用 `NormalServiceFilter` 过滤，本类服务亦可不单独配置，除上述两种服务以外都认为是普通服务
+    
+### 3.1 数据库（DB）：Mysql
 
 **前置条件**
 
@@ -204,36 +319,41 @@ rsActive 的 候选 value 有:
 
 3. 更换 driver，如: `spring.datasource.driver-class-name=io.appactive.db.mysql.driver.Driver`
 
-### 1.4 基本配置
-凡是依赖 `appactive-java-api` 模块的应用，启动时候都要配置参数 `-Dappactive.path=/path/to/path-address`。
-path-address的内容为：
+### 4.1 基本配置
 
-    ```
-    {
-        "appactive.machineRulePath":"/app/data/machine.json",
-        "appactive.machineRulePath":"/app/data/machine.json",
-        "appactive.dataScopeRuleDirectoryPath":"/app/data",
-        "appactive.forbiddenRulePath":"/app/data/forbiddenRule.json",
-        "appactive.trafficRulePath":"/app/data/idUnitMapping.json",
-        "appactive.transformerRulePath":"/app/data/idTransformer.json",
-        "appactive.idSourceRulePath":"/app/data/idSource.json",
-    }
-    
-    ```
-    其中
-    
-    - appactive.forbiddenRulePath: 描述禁写哪些路由标
-    - appactive.transformerRulePath: 描述如何解析路由标
-    - appactive.trafficRulePath: 描述路由标和单元的映射关系
-    - appactive.machineRulePath: 描述当前机器的归属单元
-    - appactive.dataScopeRuleDirectoryPath: 存放数据库的属性文件，一个数据库一个文件，文件命名为：activeInstanceId-activeDbName 或者 activeInstanceId-activeDbName-activePort
-    - appactive.idSourceRulePath: 描述如何从http流量中获取路由ID  
+凡是依赖 `appactive-java-api` 模块的应用，启动时候都要配置参数：
+
+```
+-Dappactive.channelTypeEnum=NACOS
+```
+
+表征当前应用使用 Nacos 作为命令通道，并且使用 appactiveDemoNamespaceId空间。
+该空间需要有一些几个 dataId（下面管控面进行说明），这些 dataId 的 groudId 必须一致，比如默认为 `appactive.groupId`
+当然这些都可以在启动参数进行配置，如
+
+```
+-Dappactive.dataId.idSourceRulePath=someDataId
+-Dappactive.dataId.transformerRulePath=otherDataId
+......
+-Dappactive.groupId=myGroupId
+```
 
 ## 二、管控面
 
 在应用部署完成后要进行基线推送，在希望调整流量时进行切流。核心是规则的构造和推送，这里重点将几个规则进行说明。
 
-- appactive.transformerRulePath，举例：
+- appactive.dataId.idSourceRulePath，举例：
+
+    ```
+    {
+        "source": "arg,header,cookie",
+        "tokenKey": "r_id"
+    }
+    ```
+
+    说明，从http parameter、header、cookie 中按顺序寻找以r_id为key的value，找到一个即终止寻找过程。
+    
+- appactive.dataId.transformerRulePath，举例：
 
     ```
     {
@@ -245,7 +365,7 @@ path-address的内容为：
     说明，提取到路由标后按照10000取模，作为最终路由标。
 
 
-- appactive.trafficRulePath，举例：
+- appactive.dataId.trafficRouteRulePath，举例：
 
     ```
     {
@@ -279,15 +399,7 @@ path-address的内容为：
     
     按 10000 取模后在 2000～9999 范围内的路由标应该被路由到 center；
 
-- appactive.machineRulePath，举例：
-
-    ```
-    {"unitFlag":"unit"}
-    
-    ```
-    说明当前应用部署在 unit
-
-- appactive.forbiddenRulePath，举例：
+- appactive.dataId.forbiddenRulePath，举例：
 
     假设我们希望将 2000~2999 从 unit 划分到 center，则新的appactive.trafficRulePath如下
     

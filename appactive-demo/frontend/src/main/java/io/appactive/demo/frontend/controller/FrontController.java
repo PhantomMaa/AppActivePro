@@ -51,7 +51,7 @@ public class FrontController {
     @Autowired
     private Environment env;
 
-    private Map<String, String[]> metaData ;
+    private Map<String, String[]> metaData;
 
     @RequestMapping("/")
     public String index() {
@@ -62,12 +62,7 @@ public class FrontController {
     @ResponseBody
     public ResultHolder<List<Product>> list() {
         // normal
-        try {
-            return frontEndService.list();
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return new ResultHolder<>(null);
-        }
+        return frontEndService.list();
     }
 
     @GetMapping(value = "/detail")
@@ -79,11 +74,8 @@ public class FrontController {
 
     @RequestMapping("/buy")
     @ResponseBody
-    public ResultHolder<String> buy(
-            @RequestParam(required = false, defaultValue = "jack") String user,
-            @RequestParam(required = false, defaultValue = "12") String id,
-            @RequestParam(required = false, defaultValue = "5") Integer number
-    ) {
+    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "12") String id,
+                                    @RequestParam(required = false, defaultValue = "5") Integer number) {
         // unit
         return frontEndService.buy(id, number);
     }
@@ -93,24 +85,24 @@ public class FrontController {
     public ResultHolder<String> echo(
             @RequestParam(required = false, defaultValue = "echo content") String content
     ) {
-        return new ResultHolder<>(appName + " : " +content);
+        return new ResultHolder<>(appName + " : " + content);
     }
 
     @RequestMapping("/check")
     @ResponseBody
     public String check() {
-        return "OK From "+appName;
+        return "OK From " + appName;
     }
 
     @RequestMapping("/show")
     @ResponseBody
     public String show() {
-        return "routerId: "+AppContextClient.getRouteId();
+        return "routerId: " + AppContextClient.getRouteId();
     }
 
 
     @ModelAttribute("metaData")
-    public Map<String,String[]> getMetaData() {
+    public Map<String, String[]> getMetaData() {
         return metaData;
     }
 
@@ -119,8 +111,11 @@ public class FrontController {
         String unitList = env.getProperty("io.appactive.demo.unitlist");
         String appList = env.getProperty("io.appactive.demo.applist");
         metaData = new HashMap<>(2);
-        metaData.put("unitList",unitList.split(","));
-        metaData.put("appList",appList.split(","));
+        assert unitList != null;
+        assert appList != null;
+
+        metaData.put("unitList", unitList.split(","));
+        metaData.put("appList", appList.split(","));
     }
 
     @RequestMapping("/meta")
@@ -135,7 +130,7 @@ public class FrontController {
                               Model model) {
         // normal
         ResultHolder<List<Product>> resultHolder = rpcType == RPCType.Dubbo ?
-                frontEndService.list() : (call.equals("feign")?productDAO.list():productDAO.listTemplate());
+                frontEndService.list() : (call.equals("feign") ? productDAO.list() : productDAO.listTemplate());
 
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("products", resultHolder.getResult());
@@ -161,24 +156,21 @@ public class FrontController {
     }
 
     private ResultHolder<Product> getProductResultHolder(RPCType rpcType, String id, Boolean hidden, String call) {
-        ResultHolder<Product> resultHolder ;
-        if (rpcType == RPCType.Dubbo){
+        ResultHolder<Product> resultHolder;
+        if (rpcType == RPCType.Dubbo) {
             resultHolder = hidden ? frontEndService.detailHidden(id) : frontEndService.detail(AppContextClient.getRouteId(), id);
-        }else {
+        } else {
             resultHolder = hidden ? productDAO.detailHidden(id) :
-                    (call.equals("feign")?productDAO.detail(AppContextClient.getRouteId(), id):productDAO.detailTemplate(AppContextClient.getRouteId(), id));
+                    (call.equals("feign") ? productDAO.detail(AppContextClient.getRouteId(), id) : productDAO.detailTemplate(AppContextClient.getRouteId(), id));
         }
         return resultHolder;
     }
 
     @RequestMapping("/buyProduct")
-    public String buyProduct(
-            @CookieValue(value = "rpc_type", required = false, defaultValue = "Dubbo") RPCType rpcType,
-            @RequestParam(required = false, defaultValue = "12") String pId,
-            @RequestParam(required = false, defaultValue = "1") Integer number,
-            @RequestParam(required = false, defaultValue = "feign") String call,
-            Model model
-    ) {
+    public String buyProduct(@CookieValue(value = "rpc_type", required = false, defaultValue = "Dubbo") RPCType rpcType,
+                             @RequestParam(required = false, defaultValue = "12") String pId,
+                             @RequestParam(required = false, defaultValue = "1") Integer number,
+                             @RequestParam(required = false, defaultValue = "feign") String call, Model model) {
         // unit
         ResultHolder<String> resultHolder = rpcType == RPCType.Dubbo ?
                 frontEndService.buy(pId, number) : productDAO.buy(AppContextClient.getRouteId(), pId, number);

@@ -58,11 +58,11 @@ note：this demo contains many applications, please adjust your memory settings 
 > If you plan to stop the experience, you can proceed: `cd appactive-demo` -> `docker-compose down`
 
 #### More
-For more, please visit [demo](docs/en/details/demo_nacos.md)
+For more, please visit [demo](docs/en/details/demo)
 
 ## Developer Guide
 
-- [DEVELOPER Guide](docs/en/details/developer_guide_nacos.md) ：Introduce how to use AppActive, including basic samples,
+- [DEVELOPER Guide](docs/en/details/developer_guide) ：Introduce how to use AppActive, including basic samples,
   support plug-ins, version management, use effects.
 
 ## Change Log

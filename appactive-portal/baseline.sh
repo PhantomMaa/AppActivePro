@@ -14,75 +14,45 @@
 # limitations under the License.
 #
 
-# sh baseline.sh 2   or   sh baseline.sh 2 NACOS appactiveDemoNamespaceId
-# sh baseline.sh 3
+# sh baseline.sh 2 // 通过nacos通道，推送应用规则
+# sh baseline.sh 3  // 推送网关规则
 
 type=$1
-channel=$2
-tenant=$3
-if  [ ! -n "$channel" ] ;then
-    channel="FILE"
-fi
-echo "channel: ${channel}"
-
 
 if [ `expr $type % 2` == 0 ]
 then
-  if [ $channel = "FILE" ]
-  then
-    for file in $(ls ../appactive-demo/data/); do
-      if [[ "$file" == *"path-address"* ]]; then
-        echo "continue"
-        continue
-      fi
-      echo "$(date "+%Y-%m-%d %H:%M:%S") 应用 ${file} 基线推送中";
-      cp -f ./rule/idSource.json "../appactive-demo/data/$file/"
-      cp -f ./rule/transformerBetween.json "../appactive-demo/data/$file/idTransformer.json"
-      cp -f ./rule/idUnitMapping.json "../appactive-demo/data/$file/"
-      cp -f ./rule/dbProperty.json "../appactive-demo/data/$file/mysql-product"
-      arr=(${file//-/ })
-      unitFlag=${arr[1]}
-      echo "{\"unitFlag\":\"${unitFlag}\"}" > "../appactive-demo/data/$file/machine.json"
-      echo "$(date "+%Y-%m-%d %H:%M:%S") 应用 ${file} 基线推送完成"
-    done
-  elif [ $channel = "NACOS" ]
-  then
-    dataIdPrefix="appactive.dataId."
-    groupId="appactive.groupId"
+  dataIdPrefix="appactive.dataId."
+  groupId="appactive.groupId"
 
-    idSourceRule=$(cat ./rule/idSource.json)
-    echo "$(date "+%Y-%m-%d %H:%M:%S") idSourceRule 推送结果: " \
-      && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
-      -d "tenant=${tenant}&dataId=${dataIdPrefix}idSourceRulePath&group=${groupId}&content=${idSourceRule}" \
-      && echo ""
+  idSourceRule=$(cat ./rule/idSource.json)
+  echo "$(date "+%Y-%m-%d %H:%M:%S") idSourceRule 推送结果: " \
+    && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
+    -d "dataId=${dataIdPrefix}idSourceRulePath&group=${groupId}&content=${idSourceRule}" \
+    && echo ""
 
-    idTransformerRule=$(cat ./rule/transformerBetween.json)
-    echo "$(date "+%Y-%m-%d %H:%M:%S") idTransformerRule 推送结果: " \
-      && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
-      -d "tenant=${tenant}&dataId=${dataIdPrefix}transformerRulePath&group=${groupId}&content=${idTransformerRule}" \
-      && echo ""
+  idTransformerRule=$(cat ./rule/transformerBetween.json)
+  echo "$(date "+%Y-%m-%d %H:%M:%S") idTransformerRule 推送结果: " \
+    && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
+    -d "dataId=${dataIdPrefix}transformerRulePath&group=${groupId}&content=${idTransformerRule}" \
+    && echo ""
 
-    idUnitMappingRule=$(cat ./rule/idUnitMapping.json)
-    echo "$(date "+%Y-%m-%d %H:%M:%S") idUnitMappingRule 推送结果: " \
-      && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
-      -d "tenant=${tenant}&dataId=${dataIdPrefix}trafficRouteRulePath&group=${groupId}&content=${idUnitMappingRule}" \
-      && echo ""
+  idUnitMappingRule=$(cat ./rule/idUnitMapping.json)
+  echo "$(date "+%Y-%m-%d %H:%M:%S") idUnitMappingRule 推送结果: " \
+    && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
+    -d "dataId=${dataIdPrefix}trafficRouteRulePath&group=${groupId}&content=${idUnitMappingRule}" \
+    && echo ""
 
-    forbiddenRule=$(cat ./rule/forbiddenRuleEmpty.json)
-    echo "$(date "+%Y-%m-%d %H:%M:%S") forbiddenRule 推送结果: " \
-      && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
-      -d "tenant=${tenant}&dataId=${dataIdPrefix}forbiddenRulePath&group=${groupId}&content=${forbiddenRule}" \
-      && echo ""
+  forbiddenRule=$(cat ./rule/forbiddenRuleEmpty.json)
+  echo "$(date "+%Y-%m-%d %H:%M:%S") forbiddenRule 推送结果: " \
+    && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
+    -d "dataId=${dataIdPrefix}forbiddenRulePath&group=${groupId}&content=${forbiddenRule}" \
+    && echo ""
 
-    dataScopeRule=$(cat ./rule/dbProperty.json)
-    echo "$(date "+%Y-%m-%d %H:%M:%S") dataScopeRule 推送结果: " \
-      && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
-      -d "tenant=${tenant}&dataId=${dataIdPrefix}dataScopeRuleDirectoryPath_mysql-product&group=${groupId}&content=${dataScopeRule}" \
-      && echo ""
-  else
-    echo "unsupported channel: ${channel}"
-    exit 1
-  fi
+  dataScopeRule=$(cat ./rule/dbProperty.json)
+  echo "$(date "+%Y-%m-%d %H:%M:%S") dataScopeRule 推送结果: " \
+    && curl -X POST "127.0.0.1:8848/nacos/v1/cs/configs" \
+    -d "dataId=${dataIdPrefix}dataScopeRuleDirectoryPath_mysql-product&group=${groupId}&content=${dataScopeRule}" \
+    && echo ""
 fi
 
 if [ `expr $type % 3` == 0 ]

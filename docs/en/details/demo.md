@@ -1,15 +1,19 @@
 ---
 layout: default
-nav_order: 7
+nav_order: 3
 ---
-# Demo(File)
+# Demo(Nacos)
 
 ## Overall architecture
-![appactive_landscape](https://appactive.oss-cn-beijing.aliyuncs.com/images/AppActive-demo.png)
+
+![appactive_landscape](https://appactive.oss-cn-beijing.aliyuncs.com/images/demo.png)
 
 The overall structure of this demo is shown in the figure.
 
-Note: The registry nacos and database mysql that the application depends on are not shown in the figure.
+Note: 
+- The registry nacos and database mysql that the application depends on are not shown in the figure.
+- The demo uses nacos as a command channel, the one with file can be seen [here](demo.md) 
+
 
 There are 2 units:
 
@@ -42,11 +46,13 @@ note: this demo contains many applications，please adjust your memory settings 
 
 ### Step
 
-1. Run `sh run.sh` in the `appactive-demo` module to start all applications
+1. Run `sh run-nacos-quick.sh` in the `appactive-demo` module to start all applications
 2. Bind hosts: `127.0.0.1 demo.appactive.io`, and then visit `http://demo.appactive.io/buyProduct?r_id=2000` to see how it works
-3. Run `sh cut.sh` in the `appactive-portal` module to switch flow. It should be noted that the writing-forbidden rules of this demo are hard-coded. If you want to change the range, you need to calculate the writing-forbidden rules and the next-routing rules, and then execute the flow switch.
+3. Run `sh cut.sh NACOS appactiveDemoNamespaceId` in the `appactive-portal` module to switch flow. It should be noted that the writing-forbidden rules of this demo are hard-coded. If you want to change the range, you need to calculate the writing-forbidden rules and the next-routing rules, and then execute the flow switch.
 
-> If you plan to stop the experience, you can proceed: `cd appactive-demo` -> `docker-compose down`
+> If you plan to stop the experience, you can proceed: `cd appactive-demo` -> `sh quit.sh`
+
+If you want to experience demo directly， please visit [demo site](http://demo.appactive.io/)
 
 ## Build From Source
 
@@ -57,39 +63,55 @@ note: this demo contains many applications，please adjust your memory settings 
 ### Step
 
 1. Enter `appactive-gateway/nginx-plugin` dir and build image: `docker build --build-arg UNITFLAG=center -t app-active/gateway:0.2.1 .`
-2. Enter `appactive-demo` module, and then run maven-build command to get all the jars
-3. Run `sh baseline.sh 2` in the `appactive-portal` module to push the application baseline
-4. Run `sh run.sh` in the `appactive-demo` module to start all applications and gateway
-5. Run `sh baseline.sh 3` in the `appactive-portal` module to push the gateway baseline
-6. Bind the local host: `127.0.0.1 demo.appactive.io`, visit the browser `http://demo.appactive.io/buyProduct?r_id=2000` to see the effect
-7. Run `sh cut.sh` in the `appactive-portal` module to cut the flow. The cut flow commands is:  `./cut.sh`. It should be noted that the write prohibition rules of this demo are hard-coded. If the user wants to change the cut flow range, he needs to calculate the write prohibition rule and the next routing rule by himself, and then execute the cut flow.
+2. In the root directory,  run maven-build command to get all the jars
+3. Run `sh run-nacos.sh 1` in the `appactive-demo `module ，then visit `127.0.0.1:8848/nacos` to create a namespace for command channel，like `appactiveDemoNamespaceId`
+4. Run `sh baseline.sh 2 NACOS appactiveDemoNamespaceId` in the `appactive-portal` module to push the application baseline
+5. Run `sh run-nacos.sh 2 appactiveDemoNamespaceId` in the `appactive-demo` module to start all applications and gateway
+6. Run `sh baseline.sh 3` in the `appactive-portal` module to push the gateway baseline
+7. Bind the local host: `127.0.0.1 demo.appactive.io`, visit the browser `http://demo.appactive.io/buyProduct?r_id=2000` to see the effect
+8. Run `sh cut.sh NACOS appactiveDemoNamespaceId` in the `appactive-portal` module to switch flow. It should be noted that the write-prohibition rules of this demo are hard-coded. If the user wants to change the flow-switch range, he needs to calculate the write-prohibition rules and the next-routing-rule by himself, and then execute the switching command.
 
 ## Modules Experience 
 
-### Filter
+### Premise
 
-#### step
-
-1. In `appactive-portal`, run `sh baseline.sh 2`
-2. build all jar needed
-3. run java application
+1. Run nacos in `appactive-demo`
 
     ```
-    java -Dappactive.machineRulePath=/Path-to-Appactive/appactive-demo/data/frontend-unit/machine.json \
-    -Dappactive.dataScopeRuleDirectoryPath=/Path-to-Appactive/appactive-demo/data/frontend-unit \
-    -Dappactive.forbiddenRulePath=/Path-to-Appactive/appactive-demo/data/frontend-unit/forbiddenRule.json \
-    -Dappactive.trafficRulePath=/Path-to-Appactive/appactive-demo/data/frontend-unit/idUnitMapping.json \
-    -Dappactive.transformerRulePath=/Path-to-Appactive/appactive-demo/data/frontend-unit/idTransformer.json \
-    -Dappactive.idSourceRulePath=/Path-to-Appactive/appactive-demo/data/frontend-unit/idSource.json \
-    -Dappactive.unit=unit \
-    -Dappactive.app=frontend \
-    -Dio.appactive.demo.unitlist=center,unit \
-    -Dio.appactive.demo.applist=frontend,product,storage \
-    -Dserver.port=8886 \
+    cd dependency/nacos && sh run.sh
+    
+    # and then create a namespace for command channel，like `appactiveDemoNamespaceId`
+    ```
+
+2. Push rules in `appactive-portal`
+   ```
+    sh baseline.sh 2 NACOS appactiveDemoNamespaceId
+   ```
+   
+3. Run mysql in `appactive-demo`
+
+    ```
+    cd dependency/mysql && sh run.sh
+    ```
+
+### Filter
+
+#### steps
+
+1. build all jar needed
+2. run java application
+
+    ```
+    java -Dappactive.channelTypeEnum=NACOS \
+           -Dappactive.unit=unit \
+           -Dappactive.app=frontend \
+           -Dio.appactive.demo.unitlist=center,unit \
+           -Dio.appactive.demo.applist=frontend,product,storage \
+           -Dserver.port=8886 \
     -jar frontend-0.2.1.jar
     ```
 
-4. test
+3. test
 
     ```
     curl 127.0.0.1:8886/show?r_id=1 -H "r_id:2" -b "r_id=3"
@@ -106,16 +128,10 @@ note: this demo contains many applications，please adjust your memory settings 
 
 #### steps
 
-1. in `appactive-portal` module, run `sh baseline.sh 2`
-2. in `appactive-demo`module, run nacos
-    ```
-    cd dependency/nacos && sh run.sh
-    ```
-3. in `appactive-demo` module, run mysql
+1. Data initiation
 
     ```
-    cd dependency/mysql && sh run.sh
-    # then enter container
+    # enter container
     docker exec -ti appactive-mysql bash
     # import data
     mysql -uroot -pdemo_appactiive_pw product < /root/init.sql
@@ -123,15 +139,10 @@ note: this demo contains many applications，please adjust your memory settings 
     exit 
     ```
 
-4. build all the jars and run
+2. build all the jars and run
 
     ```
-    java -Dappactive.machineRulePath=/Path-to-Appactive/appactive-demo/data/storage-unit/machine.json \
-         -Dappactive.dataScopeRuleDirectoryPath=/Path-to-Appactive/appactive-demo/data/storage-unit \
-         -Dappactive.forbiddenRulePath=/Path-to-Appactive/appactive-demo/data/storage-unit/forbiddenRule.json \
-         -Dappactive.trafficRulePath=/Path-to-Appactive/appactive-demo/data/storage-unit/idUnitMapping.json \
-         -Dappactive.transformerRulePath=/Path-to-Appactive/appactive-demo/data/storage-unit/idTransformer.json \
-         -Dappactive.idSourceRulePath=/Path-to-Appactive/appactive-demo/data/storage-unit/idSource.json \
+    java -Dappactive.channelTypeEnum=NACOS \
          -Dappactive.unit=unit \
          -Dappactive.app=storage \
          -Dspring.datasource.url="jdbc:mysql://127.0.0.1:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT&activeInstanceId=mysql&activeDbName=product" \
@@ -139,13 +150,20 @@ note: this demo contains many applications，please adjust your memory settings 
     -jar storage-0.2.1.jar
     ```
 
-5. test
+3. test
 
     ```
     curl 127.0.0.1:8882/buy?r_id=1 
-    routerId 1 bought 1 of item 12, result: success
-    curl 127.0.0.1:8882/buy?r_id=4567 
-    routerId 4567 bought 1 of item 12, result: machine:unit,traffic:CENTER,not equals 
+    # You can see error: 403 FORBIDDEN "this is not center machine:unit"
+    # This req is rejected by unit service proctetion
+    ```
+    ```
+    # By pass unit service proctetion，test db protection directlly
+    curl 127.0.0.1:8882/buy1?r_id=1 
+    {"result":"routerId 1 bought 1 of item 12, result: success","chain":[{"app":"storage","unitFlag":"center"}]}%
+    
+    curl 127.0.0.1:8882/buy1?r_id=4657 
+    {"result":"routerId 4657 bought 1 of item 12, result: machine:unit,traffic:CENTER,not equals","chain":[{"app":"storage","unitFlag":"unit"}]}
     
     ```
 
@@ -155,71 +173,35 @@ Visit [nginx-plugin](/appactive-gateway/nginx-plugin/Readme.md)
 
 ### Dubbo
 
-The building process of Dubbo demo is too complicated，we suggest using demo in "quick start": 
-1. first of all, modify rules in frontend-center, so that frontend-center would route request to the wrong unit
+the building process of demo of Dubbo is far too complicated，we suggest using demo in  "quick start": 
+
+### SpringCloud
+
+the building process of demo of Dubbo is far too complicated，we suggest using demo in  "quick start". 
+Specially，unit service protection testing are as follows:
+
+1. run test
 
     ```
-    cd data/frontend-center
-    vim idUnitMapping.json
+    curl 127.0.0.1:8884/detail -H "Host:demo.appactive.io" -H "appactive-router-id:2499"
+    # you will notice an error
+    403 FORBIDDEN "routerId 2499 does not belong in unit:unit"
     ```
-
-    the rules are as follows
-
-    ```
-    {
-      "itemType": "UnitRuleItem",
-      "items": [
-        {
-          "name": "unit",
-          "conditions": [
-            {
-              "@userIdBetween": [
-                "0~2999"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "center",
-          "conditions": [
-            {
-              "@userIdBetween": [
-                "3000~9999"
-              ]
-            }
-          ]
-        }
-      ]
-    }
-    ```
-
-2. run test
-
-    ```
-    curl 127.0.0.1:8885/detail -H "Host:demo.appactive.io" -H "r_id:2499" 
-    # you can see error logs as follows  
-    [appactive/io.appactive.demo.common.service.dubbo.ProductServiceUnit:1.0.0] [detail] from [172.18.0.9] is rejected by UnitRule Protection, targetUnit [CENTER], currentUnit [unit].)
-    ```
-
-because we modified rules, so that frontend-center would route request of routerId 2499 to unit. 
-however，request like this should be routed to center, so provider in unit would deny such request.
+A request of 2499 was routed to unit, however, request of 2499 should be routed to center,thus the provider of unit rejected this request
 
 ## Rule description
 
-### Baseline
-
 After running all applications, we ran baseline.sh and actually did the following things:
 
-- Push rules to other applications through file channels
+- Push rules to other applications through nacos channel
 - Push rules to gateway through http channel
 
 The rules include
 
-- idSource.json: Describes how to extract routing labels from http traffic
-- idTransformer.json: Describe how to parse the routing mark
-- idUnitMapping.json: Describe the mapping relationship between the routing mark and the unit
-- machine.json: describes the attribution unit of the current machine
-- mysql-product: describe the attributes of the database
+- appactive.dataId.idSourceRulePath: Describes how to extract routing labels from http traffic
+- appactive.dataId.transformerRulePath: Describe how to parse the routing mark
+- appactive.dataId.trafficRouteRulePath: Describe the mapping relationship between the routing mark and the unit
+- appactive.dataId.dataScopeRuleDirectoryPath_mysql-product: describes the attribution unit of the current machine
 
 ### Switch flow
 Mainly do the following things when switching flow:
@@ -229,4 +211,4 @@ Mainly do the following things when switching flow:
 - Push banning rules to other apps
 - Wait for the data to tie and push the new mapping relationship rules to other applications
 
-Note that the new mapping relationship is the target state you want to achieve, and the prohibition rule is the difference calculated based on the target state and the status quo. Currently, both of these need to be manually set and updated to the corresponding json file under `appactive-portal/rule`, and then run `./cut.sh `
+Note that the new mapping relationship is the target state you want to achieve, and the prohibition rule is the difference calculated based on the target state and the status quo. Currently, both of these need to be manually set and updated to the corresponding json file under `appactive-portal/rule`, and then run `sh cut.sh NACOS appactiveDemoNamespaceId`

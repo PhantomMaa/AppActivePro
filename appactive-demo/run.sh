@@ -16,31 +16,31 @@
 
 cmd=$1
 
-if [ $cmd == 'build' ]
+if [ "$cmd" == 'build' ]
 then
   docker-compose build
 fi
 
-if [ $cmd == 'pre-start' ]
+if [ "$cmd" == 'pre-start' ]
 then
   docker-compose up -d nacos mysql
 fi
 
-if [ $cmd == 'start' ]
+if [ "$cmd" == 'start' ]
 then
-  cd ../appactive-portal
-  sh baseline.sh 2 NACOS
+  cd ../appactive-portal || exit
+  sh baseline.sh 2
 
-  cd ../appactive-demo
+  cd ../appactive-demo || exit
   docker-compose up -d
 fi
 
-if [ $cmd == 'stop' ]
+if [ "$cmd" == 'stop' ]
 then
   docker-compose stop storage storage-unit product product-unit frontend frontend-unit gateway
 fi
 
-if [ $cmd == 'destory' ]
+if [ "$cmd" == 'destroy' ]
 then
   docker-compose down
 fi

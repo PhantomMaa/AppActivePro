@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package io.appactive.channel.file;
-
-import java.nio.charset.Charset;
-
-public interface FileConstant {
+package io.appactive.channel;
 
 
-    int DEFAULT_BUF_SIZE = 1024 * 1024;
+public interface RulePropertyConstant {
 
-    Charset DEFAULT_CHARSET = Charset.forName("utf-8");
+    String PROPERTY_HEADER = "appactive";
+
+    /**
+     * unit-flag from jvm/env key
+     */
+    String UNIT_LAG_PROPERTY_KEY = PROPERTY_HEADER + ".unit";
+
+    /**
+     * nacos
+     */
+    String DATA_ID_HEADER = PROPERTY_HEADER + ".dataId";
+    String GROUP_ID = PROPERTY_HEADER + ".groupId";
+    String NAMESPACE_ID = PROPERTY_HEADER + ".namespaceId";
+    String LOCAL_NACOS = "127.0.0.1:8848";
+
 }

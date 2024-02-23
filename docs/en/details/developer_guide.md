@@ -1,17 +1,18 @@
 ---
 layout: default
-nav_order: 8
+nav_order: 4
 ---
-# Develop Guide(File)
+# Develop Guide(Nacos)
 
 ---
 
-## 1. Data Plane
+## A. Data Plane
+
 ### 1.1 Gateway: Nginx
 
 **precondition**
 
--You need your gateway to be implemented based on nginx and have the ability to run lua
+- You need your gateway to be implemented based on nginx and have the ability to run lua
 
 **Transformation steps**
 
@@ -49,7 +50,7 @@ upstream %VAR_APP_ID%_%UNIT_FLAG_N%_default {
 
 ```
 
-in:
+in which:
 
 - VAR_DOMAIN: The domain name used directly by the end user, mandatory. The other two unit subdomains are optional
 - VAR_URI: specific URI
@@ -58,16 +59,16 @@ in:
 - UNIT_FLAG_N: unit flag of each unit
 - VAR_BACKEND_IP_LIST: the back-end application IP of the corresponding unit
 
-### 1.2 Microservices (RPC): Dubbo
+### 2.1 Microservices (RPC): Dubbo
+
 **precondition**
 
--You need to implement your application services based on Java and implement service calls with Dubbo
+- You need to implement your application services based on Java and implement service calls with Dubbo
 
-#### Entry application
+#### Frontend application
 
-The entry application is responsible for extracting the routing beacon from the traffic and setting it in the context
+The frontend application is responsible for extracting the routing beacon from the traffic and setting it in the context
 
-**Transformation steps**
 
 1. Introduce maven dependency
 
@@ -98,7 +99,7 @@ The entry application is responsible for extracting the routing beacon from the 
 3. When the request comes, you can call `AppContextClient.getRouteId();` in the application to get the route ID
 
 #### All applications
-**Transformation steps**
+
 
 1. Introduce maven dependency in both provider and consumer
 
@@ -157,10 +158,9 @@ The entry application is responsible for extracting the routing beacon from the 
     
     ```
 
-The core is to add annotations
-`parameters = {"rsActive","unit","routeIndex","0"}`
+The core is to add annotations `parameters = {"rsActive","unit","routeIndex","0"}`.
 If rsActive is unit, it indicates that this is a unit service, and a routeIndex of 0 indicates that the route ID is the 0th parameter.
-The candidate values of rsActive are:
+The candidate values ​​of rsActive are:
 
 - normal: normal service, which requires no multi-active modification, and will route as it was
 - unit: unit service, which will only route within right unit according to multi-active rules
@@ -173,7 +173,117 @@ The implicit call does not need to modify the method signature, just manually se
 Last but no least, we import unit protection filter. Take springboot as an example, adding one line in application.properties will do the trick:
 `dubbo.provider.filter=unitProtectionFilter`
 
-### 1.3 Database (DB): Mysql
+### 2.2 Microservices（RPC）：SpringCloud
+
+**precondition**
+
+- You need SpringCloud for your microservices
+- We support Ribbon for load balancing, SpringCloudBalancer not supported yet
+- We support declarative http clients：Feign and RestTemplate. Raw Http clients such as OkHttp and HttpClient are not supported yet
+
+#### Frontend application
+
+The frontend application is responsible for extracting the routing beacon from the traffic and setting it in the context
+
+
+1. Introduce maven dependency for both consumer and producer
+
+    ```
+    <dependency>
+        <groupId>com.alibaba.msha</groupId>
+        <artifactId>client-bridge-rpc-springcloud-common</artifactId>
+        <version>0.2.1</version>
+    </dependency>
+    ```
+   
+    if you use Nacos as service registry，you should import
+    ```
+    <dependency>
+        <groupId>com.alibaba.msha</groupId>
+        <artifactId>client-bridge-rpc-springcloud-nacos</artifactId>
+        <version>0.2.1</version>
+    </dependency>
+    ```
+    
+    if you use Eureka as service registry，you should import
+    ```
+    <dependency>
+       <groupId>com.alibaba.msha</groupId>
+       <artifactId>client-bridge-rpc-springcloud-eureka</artifactId>
+       <version>0.2.1</version>
+    </dependency>
+    ```
+    
+    It should be noted that you can not use 2 registry at the same time.
+    Then import auto config
+    
+    `@Import({ConsumerAutoConfig.class, NacosAutoConfig.class})`
+
+2. import aspect config for consumer
+    ```
+    <build>
+        <plugins>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.11</version>
+                <configuration>
+                    <aspectLibraries>
+                        <aspectLibrary>
+                            <groupId>com.alibaba.msha</groupId>
+                            <artifactId>client-bridge-rpc-springcloud-common</artifactId>
+                        </aspectLibrary>
+                    </aspectLibraries>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <complianceLevel>1.8</complianceLevel>
+                    <forceAjcCompile>true</forceAjcCompile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>compileId</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    ```
+    In which we defined a multi-active routing policy
+
+3. Define service type for uris in providers, such as
+
+    ```
+    @Bean
+    public FilterRegistrationBean<UnitServiceFilter> appActiveUnitServiceFilter() {
+        FilterRegistrationBean<UnitServiceFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        UnitServiceFilter reqResFilter = new UnitServiceFilter();
+        filterRegistrationBean.setFilter(reqResFilter);
+        filterRegistrationBean.addUrlPatterns("/detailHidden/*","/detail/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<CenterServiceFilter> appActiveCenterServiceFilter() {
+        FilterRegistrationBean<CenterServiceFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        CenterServiceFilter reqResFilter = new CenterServiceFilter();
+        filterRegistrationBean.setFilter(reqResFilter);
+        filterRegistrationBean.addUrlPatterns("/buy/*");
+        return filterRegistrationBean;
+    }
+    ```
+   
+    Service types are defined the same way as in Dubbo
+ 
+    - center: center service, which will only route within center idc, and is filtered by `CenterServiceFilter`
+    - unit: unit service, which will only route within right unit according to multi-active rules, and is filtered by `UnitServiceFilter`
+    - normal: normal service, which requires no multi-active modification, and will route as it was, and is filtered by `NormalServiceFilter`. Fyi, you can skip this service cause any service other than the above 2 types is considered as normal services. 
+    
+### 3.1 Database (DB): Mysql
 
 **precondition**
 
@@ -204,31 +314,27 @@ Last but no least, we import unit protection filter. Take springboot as an examp
 
 3. Replace the driver, such as: `spring.datasource.driver-class-name=io.appactive.db.mysql.driver.Driver`
 
-### 1.4 Basic configuration
-All applications that rely on the `appactive-java-api` module must configure the parameter `-Dappactive.path=/path/to/path-address` when starting.
-The content of path-address is:
+### 4.1 Basic configuration
+
+All applications that rely on the `appactive-java-api` module must configure the parameters bellow
 
 ```
-{
-    "appactive.machineRulePath":"/app/data/machine.json",
-    "appactive.dataScopeRuleDirectoryPath":"/app/data",
-    "appactive.forbiddenRulePath":"/app/data/forbiddenRule.json",
-    "appactive.trafficRulePath":"/app/data/idUnitMapping.json",
-    "appactive.transformerRulePath":"/app/data/idTransformer.json",
-    "appactive.idSourceRulePath":"/app/data/idSource.json",
-}
+-Dappactive.channelTypeEnum=NACOS
+```
+
+which indicate we use naocs as command channel and use namespace with the id "appactiveDemoNamespaceId".
+The namespace must contains several dataIds(which will be described in controll plane section), which share one groupId( "appactive.groupId" by default).
+Of course, all these parameters can be redefined,such as:
+
 
 ```
-in which
+-Dappactive.dataId.idSourceRulePath=someDataId
+-Dappactive.dataId.transformerRulePath=otherDataId
+......
+-Dappactive.groupId=myGroupId
+```
 
-- appactive.forbiddenRulePath: Describe which route flags are forbidden to write
-- appactive.transformerRulePath: Describe how to parse the routing mark
-- appactive.trafficRulePath: Describes the mapping relationship between route markers and units
-- appactive.machineRulePath: Describe the attribution unit of the current machine
-- appactive.dataScopeRuleDirectoryPath: Store the property file of the database, one file per database, the file name is: activeInstanceId-activeDbName or activeInstanceId-activeDbName-activePort
-- appactive.idSourceRulePath: describe how we extract routerId from http traffic 
-
-## 2. Control Plane
+## B. Control Plane
 
 After the application is deployed, the baseline is pushed, and the flow is switched when you want to adjust the traffic. The core is the construction and push of rules, here are a few rules to explain.
 

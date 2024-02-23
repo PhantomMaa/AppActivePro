@@ -12,7 +12,7 @@ ENV TZ=Asia/Shanghai \
 
 RUN mkdir -p /etc/nginx/logs && mkdir -p /etc/nginx/store && chmod 777 /etc/nginx/store
 
-ADD ./etc/nginx/conf /etc/nginx/conf
+ADD etc/nginx/conf /etc/nginx/conf
 
 CMD ["nginx", "-p", "/etc/nginx", "-c", "/etc/nginx/conf/nginx.conf", "-g", "daemon off;"]
 # nginx -p /etc/nginx -c /etc/nginx/conf/nginx.conf -g  "daemon off;"

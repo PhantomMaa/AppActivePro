@@ -4,8 +4,8 @@ services:
   nacos:
     container_name: nacos
     hostname: nacos
-    image: nacos/nacos-server:latest
-    platform: linux/amd64
+#    image: nacos/nacos-server:v2.3.0
+    image: nacos/nacos-server:v2.3.0-slim   # apple silicon
     environment:
       - PREFER_HOST_MODE=hostname
       - MODE=standalone
@@ -15,13 +15,10 @@ services:
   mysql:
     container_name: mysql
     hostname: mysql
-    image: mysql:5.7
-    platform: linux/amd64
+    image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: demo_appactiive_pw
       MYSQL_DATABASE: product
-    volumes:
-      - ./dependency/mysql:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
     command: [
@@ -30,12 +27,16 @@ services:
     ]
 
   gateway:
+    build: ./gateway
     container_name: gateway
     hostname: gateway
     image: app-active/gateway:0.2.1
     ports:
       - "80:80"
       - "8090:8090"
+    depends_on:
+      - "nacos"
+      - "frontend"
 
   storage:
     build: ./storage
@@ -46,18 +47,14 @@ services:
     environment:
       - spring.cloud.nacos.discovery.server-addr=nacos:8848
       - dubbo.registry.address=nacos://nacos:8848
-      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT
+      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
 #      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT&activeInstanceId=mysql&activeDbName=product
       - appactive.unit=center
       - appactive.app=storage
       - server.port=8881
       - dubbo.protocol.port=-1
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/storage-center:/app/data
     ports:
       - "8881:8881"
     depends_on:
@@ -72,18 +69,14 @@ services:
     environment:
       - spring.cloud.nacos.discovery.server-addr=nacos:8848
       - dubbo.registry.address=nacos://nacos:8848
-      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT
+      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
 #      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT&activeInstanceId=mysql&activeDbName=product
       - appactive.unit=unit
       - appactive.app=storage
       - server.port=8882
       - dubbo.protocol.port=-1
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/storage-unit:/app/data
     ports:
       - "8882:8882"
     depends_on:
@@ -99,17 +92,13 @@ services:
     environment:
       - spring.cloud.nacos.discovery.server-addr=nacos:8848
       - dubbo.registry.address=nacos://nacos:8848
-      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT
+      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
       - appactive.unit=center
       - appactive.app=product
       - server.port=8883
       - dubbo.protocol.port=-1
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/product-center:/app/data
     ports:
       - "8883:8883"
     depends_on:
@@ -125,17 +114,13 @@ services:
     environment:
       - spring.cloud.nacos.discovery.server-addr=nacos:8848
       - dubbo.registry.address=nacos://nacos:8848
-      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT
+      - spring.datasource.url=jdbc:mysql://mysql:3306/product?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
       - appactive.unit=unit
       - appactive.app=product
       - server.port=8884
       - dubbo.protocol.port=-1
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/product-unit:/app/data
     ports:
       - "8884:8884"
     depends_on:
@@ -157,12 +142,8 @@ services:
       - io.appactive.demo.unitlist=center,unit
       - io.appactive.demo.applist=frontend,product,storage
       - server.port=8885
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/frontend-center:/app/data
     ports:
       - "8885:8885"
     depends_on:
@@ -182,12 +163,8 @@ services:
       - io.appactive.demo.unitlist=center,unit
       - io.appactive.demo.applist=frontend,product,storage
       - server.port=8886
-#      - appactive.namespaceId=appactiveDemoNamespaceId
       - appactive.configServerAddress=nacos:8848
       - appactive.channelTypeEnum=NACOS
-    volumes:
-      - ./data/path-address:/home/admin/appactive/path-address
-      - ./data/frontend-unit:/app/data
     ports:
       - "8886:8886"
     depends_on:

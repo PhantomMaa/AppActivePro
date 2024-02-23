@@ -77,7 +77,6 @@
 
     <modules>
         <module>appactive-portal</module>
-        <module>appactive-gateway</module>
         <module>appactive-java-api</module>
         <module>appactive-java-client</module>
         <module>appactive-demo</module>
@@ -90,7 +89,6 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
-<!--    dependencyManagement-->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -99,8 +97,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>2.3.0</version>
+            </dependency>
 
-            <!--JUNIT-->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

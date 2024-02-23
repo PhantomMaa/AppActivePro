@@ -20,21 +20,13 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.ProductServiceUnit;
 import io.appactive.demo.product.repository.ProductRepository;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","unit","routeIndex","0"})
 public class ProductServiceUnitImpl implements ProductServiceUnit {
-
-    private static final Logger logger = LogUtil.getLogger();
-
-    @Value("${appactive.unit}")
-    private String unit;
 
     @Autowired
     ProductRepository productRepository;
