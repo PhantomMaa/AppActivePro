@@ -18,10 +18,7 @@ package io.appactive.db.mysql.driver;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.sql.Connection;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
+import java.sql.*;
 import java.util.Properties;
 
 import io.appactive.db.mysql.utils.SQLCacheCheckUtil;
@@ -38,7 +35,7 @@ import org.slf4j.Logger;
  */
 public class Driver implements java.sql.Driver, MysqlDriverService {
 
-    private static Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
     private static final String MYSQL_DRIVER_NAME_5 = "com.mysql.jdbc.NonRegisteringDriver";
 
@@ -50,7 +47,7 @@ public class Driver implements java.sql.Driver, MysqlDriverService {
 
     private static final java.sql.Driver PROXY_DRIVER = getCurrentDriver();
 
-    private static MysqlConnectionService mysqlConnectionService;
+    private static final MysqlConnectionService mysqlConnectionService;
 
     static {
         // init connection
@@ -60,16 +57,13 @@ public class Driver implements java.sql.Driver, MysqlDriverService {
     }
 
     private static void registerDriver() {
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                try {
-                    java.sql.DriverManager.registerDriver(APPACTIVE_DRIVER);
-                } catch (SQLException e) {
-                    throw new RuntimeException("Can't register driver!", e);
-                }
-                return null;
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            try {
+                DriverManager.registerDriver(APPACTIVE_DRIVER);
+            } catch (SQLException e) {
+                throw new RuntimeException("Can't register driver!", e);
             }
+            return null;
         });
     }
 

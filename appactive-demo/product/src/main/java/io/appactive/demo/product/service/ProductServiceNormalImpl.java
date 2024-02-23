@@ -22,7 +22,6 @@ import io.appactive.demo.common.service.dubbo.ProductServiceNormal;
 import io.appactive.demo.product.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,9 +29,6 @@ import java.util.List;
 @Service
 @DubboService(version = "1.0.0", group = "appactive")
 public class ProductServiceNormalImpl implements ProductServiceNormal {
-
-    @Value("${appactive.unit}")
-    private String unit;
 
     @Autowired
     ProductRepository productRepository;

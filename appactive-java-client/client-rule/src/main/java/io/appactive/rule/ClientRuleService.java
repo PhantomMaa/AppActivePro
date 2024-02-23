@@ -41,6 +41,7 @@ public class ClientRuleService {
         trafficRouteRuleService.setTransformerRuleService(transformerRuleService);
         forbiddenRuleService.setTransformerRuleService(transformerRuleService);
     }
+
     public static DataScopeRuleService getDataScopeRuleService() {
         return dataScopeRuleService;
     }

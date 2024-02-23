@@ -50,7 +50,6 @@ public class IdSourceRuleImpl implements IdSourceRuleService {
     }
 
     private void initFromUri(String uri) {
-
         ConverterInterface<String, IdSourceRule> converterInterface = (source) -> {
             JSONObject jo = JSON.parseObject(source);
             String tokenKey = jo.getString("tokenKey");

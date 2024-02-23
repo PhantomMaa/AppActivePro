@@ -20,11 +20,8 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.storage.repository.ProductRepository;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -33,21 +30,16 @@ import java.util.Optional;
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","center","routeIndex","0"})
 public class OrderServiceImpl implements OrderService {
 
-    private static final Logger logger = LogUtil.getLogger();
-
-    @Value("${appactive.unit}")
-    private String unit;
-
     @Autowired
     ProductRepository repository;
 
     @Override
     public ResultHolder<String> buy(String rId, String pId, Integer number) {
-        String result = null;
+        String result;
         try {
             Optional<Product> op = repository.findById(pId);
             if (op.isPresent()){
-                // todo 扣库存，应该强校验
+                // 扣库存
                 Product p = op.get();
                 int oldNum = p.getNumber();
                 int left = oldNum - number;

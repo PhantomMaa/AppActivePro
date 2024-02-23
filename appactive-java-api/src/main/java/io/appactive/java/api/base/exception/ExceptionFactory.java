@@ -28,13 +28,11 @@ public final class ExceptionFactory {
     }
 
     public static AppactiveException makeFault(String msg) {
-        AppactiveException exp = new AppactiveException("0000", msg);
-        return exp;
+        return new AppactiveException("0000", msg);
     }
 
     public static AppactiveException makeFault(String msg, Throwable tr) {
-        AppactiveException exp = new AppactiveException("0000", msg, tr);
-        return exp;
+        return new AppactiveException("0000", msg, tr);
     }
 
     /**
@@ -45,8 +43,7 @@ public final class ExceptionFactory {
      * @return AppactiveException
      */
     public static AppactiveException makeFault(String code, String msg) {
-        AppactiveException exp = new AppactiveException(code, msg);
-        return exp;
+        return new AppactiveException(code, msg);
     }
 
     /**
@@ -58,8 +55,7 @@ public final class ExceptionFactory {
      * @return AppactiveException
      */
     public static AppactiveException makeFault(String code, String msg, Throwable tr) {
-        AppactiveException exp = new AppactiveException(code, msg, tr);
-        return exp;
+        return new AppactiveException(code, msg, tr);
     }
 
     /**
@@ -71,8 +67,7 @@ public final class ExceptionFactory {
      */
     public static AppactiveException makeFault(IMsg messageInfo, Object... params) {
         String message = messageInfo.getMsg(params);
-        AppactiveException exp = new AppactiveException(messageInfo.getKey(), message);
-        return exp;
+        return new AppactiveException(messageInfo.getKey(), message);
     }
 
     /**
@@ -83,8 +78,7 @@ public final class ExceptionFactory {
      */
     public static AppactiveException makeFault(IMsg msg) {
         String message = msg.getMsg();
-        AppactiveException exp = new AppactiveException(msg.getKey(), message);
-        return exp;
+        return new AppactiveException(msg.getKey(), message);
     }
 
     /**
@@ -97,8 +91,7 @@ public final class ExceptionFactory {
      */
     public static AppactiveException makeFault(IMsg msg, Throwable tr, Object... params) {
         String message = msg.getMsg(params);
-        AppactiveException exp = new AppactiveException(msg.getKey(), message, tr);
-        return exp;
+        return new AppactiveException(msg.getKey(), message, tr);
     }
 
 }

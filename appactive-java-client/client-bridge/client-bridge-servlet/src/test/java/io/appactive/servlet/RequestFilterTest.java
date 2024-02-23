@@ -24,17 +24,12 @@ import org.junit.Test;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.LinkedList;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- *
- */
 public class RequestFilterTest {
-
-    HttpServletRequest request;
 
     @Test
     public void idSourceRule(){

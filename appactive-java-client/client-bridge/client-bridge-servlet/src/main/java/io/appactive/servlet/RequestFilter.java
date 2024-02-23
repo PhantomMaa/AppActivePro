@@ -43,11 +43,10 @@ import io.appactive.rule.ClientRuleService;
 import io.appactive.support.lang.CollectionUtils;
 import io.appactive.support.log.LogUtil;
 
-/**
- */
 public class RequestFilter implements Filter, ServletService {
 
-    private static final Map<IdSourceEnum, BiFunction<HttpServletRequest,String, String>> STRATEGY_MAP = new HashMap<>();
+    private static final Map<IdSourceEnum, BiFunction<HttpServletRequest, String, String>> STRATEGY_MAP = new HashMap<>();
+
     static {
         STRATEGY_MAP.put(IdSourceEnum.arg, ServletService::getRouteIdFromParams);
         STRATEGY_MAP.put(IdSourceEnum.header, ServletService::getRouteIdFromHeader);
@@ -57,29 +56,30 @@ public class RequestFilter implements Filter, ServletService {
     private static IdSourceRule ID_SOURCE_RULE;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         LogUtil.info("appactive-request-init");
         IdSourceRuleService idSourceRuleService = ClientRuleService.getIdSourceRuleService();
-        if (idSourceRuleService == null){
+        if (idSourceRuleService == null) {
             throw ExceptionFactory.makeFault("idSourceRuleService is null");
         }
+
         ID_SOURCE_RULE = idSourceRuleService.getIdSourceRule();
-        if (ID_SOURCE_RULE == null || CollectionUtils.isEmpty(ID_SOURCE_RULE.getSourceList()) || StringUtils.isBlank(ID_SOURCE_RULE.getTokenKey())){
+        if (ID_SOURCE_RULE == null || CollectionUtils.isEmpty(ID_SOURCE_RULE.getSourceList()) || StringUtils.isBlank(ID_SOURCE_RULE.getTokenKey())) {
             throw ExceptionFactory.makeFault("idSourceRule is invalid");
         }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest && response instanceof HttpServletResponse)) {
             chain.doFilter(request, response);
             return;
         }
 
-        HttpServletRequest httpRequest = (HttpServletRequest)request;
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
         IdSourceEnum idSourceEnum = getRawRouterIdSuccess(ID_SOURCE_RULE, httpRequest);
-        if (idSourceEnum != null){
+        if (idSourceEnum != null) {
             LogUtil.info(AppactiveConstant.PROJECT_NAME + "-request-doFilter-" + idSourceEnum + ":" + AppContextClient.getRouteId());
             chain.doFilter(request, response);
             clear();
@@ -95,23 +95,23 @@ public class RequestFilter implements Filter, ServletService {
 
 
     @Override
-    public IdSourceEnum getRawRouterIdSuccess(IdSourceRule idSourceRule, HttpServletRequest request){
+    public IdSourceEnum getRawRouterIdSuccess(IdSourceRule idSourceRule, HttpServletRequest request) {
         List<IdSourceEnum> sourceList = idSourceRule.getSourceList();
         for (IdSourceEnum idSourceEnum : sourceList) {
-            BiFunction<HttpServletRequest,String, String> func = STRATEGY_MAP.get(idSourceEnum);
-            if (func == null){
-                LogUtil.warn(AppactiveConstant.PROJECT_NAME + "-no-such-handler:"+idSourceEnum);
+            BiFunction<HttpServletRequest, String, String> func = STRATEGY_MAP.get(idSourceEnum);
+            if (func == null) {
+                LogUtil.warn(AppactiveConstant.PROJECT_NAME + "-no-such-handler:" + idSourceEnum);
                 continue;
             }
-            String routeId = func.apply(request,idSourceRule.getTokenKey());
-            if (check(routeId)){
+            String routeId = func.apply(request, idSourceRule.getTokenKey());
+            if (check(routeId)) {
                 return idSourceEnum;
             }
         }
         return null;
     }
 
-    private static Boolean check(String routeId){
+    private static Boolean check(String routeId) {
         if (StringUtils.isBlank(routeId)) {
             return false;
         }
@@ -121,7 +121,7 @@ public class RequestFilter implements Filter, ServletService {
 
     @Override
     public void destroy() {
-        LogUtil.info(AppactiveConstant.PROJECT_NAME+"-request-destroy");
+        LogUtil.info(AppactiveConstant.PROJECT_NAME + "-request-destroy");
     }
 
 }
