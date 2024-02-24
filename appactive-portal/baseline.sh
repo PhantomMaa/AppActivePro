@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 
-# sh baseline.sh 2 // 通过nacos通道，推送应用规则
-# sh baseline.sh 3  // 推送网关规则
+# sh baseline.sh APP // 推送应用规则
+# sh baseline.sh GATEWAY  // 推送网关规则
 
 type=$1
 
-if [ `expr $type % 2` == 0 ]
+if [ "$type" == 'APP' ]
 then
   dataIdPrefix="appactive.dataId."
   groupId="appactive.groupId"
@@ -55,7 +55,7 @@ then
     && echo ""
 fi
 
-if [ `expr $type % 3` == 0 ]
+if [ "$type" == 'GATEWAY' ]
 then
   idSource=$(cat ./rule/idSource.json)
   idTransformer=$(cat ./rule/idTransformer.json)

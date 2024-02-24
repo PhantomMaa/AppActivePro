@@ -29,10 +29,13 @@ fi
 if [ "$cmd" == 'start' ]
 then
   cd ../appactive-portal || exit
-  sh baseline.sh 2
+  sh baseline.sh APP
 
   cd ../appactive-demo || exit
   docker-compose up -d
+
+  sleep 10
+  sh baseline.sh APP
 fi
 
 if [ "$cmd" == 'stop' ]
