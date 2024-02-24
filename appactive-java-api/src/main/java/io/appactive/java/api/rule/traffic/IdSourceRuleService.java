@@ -18,8 +18,6 @@ package io.appactive.java.api.rule.traffic;
 
 import io.appactive.java.api.rule.traffic.bo.IdSourceRule;
 
-/**
- */
 public interface IdSourceRuleService {
 
     /**

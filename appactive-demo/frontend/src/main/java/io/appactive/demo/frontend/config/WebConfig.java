@@ -16,18 +16,10 @@
 
 package io.appactive.demo.frontend.config;
 
-import feign.codec.Decoder;
 import io.appactive.servlet.RequestFilter;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
-import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -43,18 +35,8 @@ public class WebConfig {
     }
 
     @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
-    @Autowired
-    private ObjectFactory<HttpMessageConverters> messageConverters;
-
-    // when you customize decoder, make sure it's annotated with Primary
-    @Bean
-    @Primary
-    public Decoder demoFeignDecoder() {
-        return new ResponseEntityDecoder(new SpringDecoder(this.messageConverters));
-    }
 }

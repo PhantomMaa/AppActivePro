@@ -13,30 +13,27 @@ import org.junit.Test;
 
 import java.util.Properties;
 
-public class ClientChannelServiceTest {
+public class NacosTest {
 
     @Test
     public void getConfigReadDataSource() {
         ConverterInterface<String, MachineUnitBO> ruleConverterInterface = source -> JSON.parseObject(source,
-                new TypeReference<MachineUnitBO>() {});
+                new TypeReference<MachineUnitBO>() {
+                });
 
         MachineUnitBO b = ruleConverterInterface.convert("{\"unitFlag\":\"unit\"}");
         System.out.println(b);
     }
 
     @Test
-    public void getConfig() {
-        try {
-            String dataId = "appactive.dataId.idSourceRulePath";
-            String group = "appactive.groupId";
-            Properties properties = new Properties();
-            properties.put(PropertyKeyConst.SERVER_ADDR, "127.0.0.1:8848");
-            properties.put(PropertyKeyConst.NAMESPACE, "appactiveDemoNamespaceId");
-            ConfigService configService = NacosFactory.createConfigService(properties);
-            String content = configService.getConfig(dataId, group, 5000);
-            System.out.println("content:"+content);
-        } catch (NacosException e) {
-            e.printStackTrace();
-        }
+    public void getConfig() throws NacosException {
+        String dataId = "appactive.dataId.idSourceRulePath";
+        String group = "appactive.groupId";
+        Properties properties = new Properties();
+        properties.put(PropertyKeyConst.SERVER_ADDR, "127.0.0.1:8848");
+        ConfigService configService = NacosFactory.createConfigService(properties);
+
+        String content = configService.getConfig(dataId, group, 5000);
+        System.out.println("content:" + content);
     }
 }

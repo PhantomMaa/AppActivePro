@@ -55,6 +55,7 @@ public class ClientChannelService {
         if (CHANNEL_TYPE_ENUM == ChannelTypeEnum.NACOS) {
             return NacosPathUtil.getInstance();
         }
+
         throw ExceptionFactory.makeFault("unsupported channel:{}", CHANNEL_TYPE_ENUM.name());
     }
 

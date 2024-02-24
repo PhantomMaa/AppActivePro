@@ -35,7 +35,8 @@ then
   docker-compose up -d
 
   sleep 10
-  sh baseline.sh APP
+  cd ../appactive-portal || exit
+  sh baseline.sh GATEWAY
 fi
 
 if [ "$cmd" == 'stop' ]

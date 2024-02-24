@@ -70,22 +70,22 @@ public class DataScopeRuleServiceImpl implements DataScopeRuleService {
     }
 
 
-
     private void initDataListener(String scopeKey) {
         String uri = RESOURCES_URI + ClientChannelService.getSubKeySplit() + scopeKey;
 
-        ConverterInterface<String, String> ruleConverterInterface = (source) -> JSON.parseObject(source,new TypeReference<String>() {});
-        ConfigReadDataSource<String> readDataSource = ClientChannelService.getConfigReadDataSource(uri,ruleConverterInterface);
+        ConverterInterface<String, String> ruleConverterInterface = (source) -> JSON.parseObject(source, new TypeReference<String>() {
+        });
+        ConfigReadDataSource<String> readDataSource = ClientChannelService.getConfigReadDataSource(uri, ruleConverterInterface);
 
-        DataListener<String> listener =new DataListener<String>() {
+        DataListener<String> listener = new DataListener<String>() {
             @Override
             public String getListenerName() {
-                return "DataScope-Listener-"+this.hashCode();
+                return "DataScope-Listener-" + this.hashCode();
             }
 
             @Override
             public void dataChanged(String oldData, String newData) {
-                if (StringUtils.isBlank(newData)){
+                if (StringUtils.isBlank(newData)) {
                     existScopeKeySet.remove(scopeKey);
                     return;
                 }

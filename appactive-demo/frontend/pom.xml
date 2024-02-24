@@ -71,7 +71,6 @@
             <artifactId>client-bridge-servlet</artifactId>
             <version>0.2.1</version>
         </dependency>
-
     </dependencies>
 
     <build>

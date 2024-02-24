@@ -55,14 +55,14 @@ public class LoggerBuilder {
             try {
                 Thread.currentThread().setContextClassLoader(classLoader);
                 logger = build(name);
-            } catch (Exception e){
-                System.out.println("build log fail,e:"+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("build log fail,e:" + e.getMessage());
                 e.printStackTrace();
-            }finally {
+            } finally {
                 Thread.currentThread().setContextClassLoader(contextClassLoader);
             }
 
-            if (logger == null){
+            if (logger == null) {
                 logger = new LoggerContext().getLogger(name);
             }
             LOGGER_NAME_OBJ_MAP.put(name, logger);
@@ -71,7 +71,7 @@ public class LoggerBuilder {
         return logger;
     }
 
-    private static final Map<String, Logger> LOGGER_NAME_OBJ_MAP = new HashMap<String, Logger>();
+    private static final Map<String, Logger> LOGGER_NAME_OBJ_MAP = new HashMap<>();
 
     private static final String LOG_PATH_PROPERTY_KEY = "appactive.log.path";
 
@@ -81,7 +81,7 @@ public class LoggerBuilder {
 
     private static final String STANDARD_FILE_LOG_PATTERN = "%m %n";
 
-    private static String getLogPath(){
+    private static String getLogPath() {
         String logDir = System.getProperty(LOG_PATH_PROPERTY_KEY);
         if (logDir != null && !logDir.isEmpty()) {
             return logDir;
@@ -97,19 +97,18 @@ public class LoggerBuilder {
     }
 
 
-
     private static Logger build(String name) {
         LoggerContext context = getContext();
         Logger logger = context.getLogger("appactive-" + name);
         //设置不向上级打印信息
         logger.setAdditive(false);
-        AsyncAppender infoAppender = getAsyncAppender(getAppender(name,null));
+        AsyncAppender infoAppender = getAsyncAppender(getAppender(name, null));
         logger.addAppender(infoAppender);
 
-        logger.addAppender(getConsoleAppender("appactive-console-"+name ,null));
+        logger.addAppender(getConsoleAppender("appactive-console-" + name, null));
         // 格式化的日志不需要这个错误日志收集
-        if(!name.endsWith(STANDARD_LOG_NAME_END_FIX)){
-            AsyncAppender errorAppender = getAsyncAppender(getAppender(name + "_error",Level.ERROR));
+        if (!name.endsWith(STANDARD_LOG_NAME_END_FIX)) {
+            AsyncAppender errorAppender = getAsyncAppender(getAppender(name + "_error", Level.ERROR));
             logger.addAppender(errorAppender);
         }
 
@@ -138,13 +137,13 @@ public class LoggerBuilder {
         return asyncAppender;
     }
 
-    private static ConsoleAppender getConsoleAppender(String name,Level level) {
+    private static ConsoleAppender getConsoleAppender(String name, Level level) {
         ConsoleAppender appender = new ConsoleAppender();
         appender.setName(name);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         appender.setContext(context);
         //这里设置级别过滤器
-        if(level != null){
+        if (level != null) {
             // 这里设置级别过滤器
             LevelFilter levelFilter = getLevelFilter(Level.ERROR);
             levelFilter.start();
@@ -164,12 +163,12 @@ public class LoggerBuilder {
         return appender;
     }
 
-        /**
-         * 通过传入的名字和级别，动态设置appender
-         *
-         * @param name
-         * @return
-         */
+    /**
+     * 通过传入的名字和级别，动态设置appender
+     *
+     * @param name
+     * @return
+     */
     private static RollingFileAppender getAppender(String name, Level level) {
         LoggerContext context = getContext();
         //这里是可以用来设置appender的，在xml配置文件里面，是这种形式：
@@ -191,7 +190,7 @@ public class LoggerBuilder {
 
         appender.setPrudent(false);
 
-        if(level != null){
+        if (level != null) {
             // 这里设置级别过滤器
             LevelFilter levelFilter = getLevelFilter(Level.ERROR);
             levelFilter.start();
@@ -203,7 +202,7 @@ public class LoggerBuilder {
         policy.setContext(context);
         //文件名格式
         String fp = OptionHelper.substVars(logPath + "history/%d{yyyy-MM-dd}/" + name + "-%d{yyyy-MM-dd}.%i.log",
-            context);
+                context);
         //最大日志文件大小
         policy.setMaxFileSize(FileSize.valueOf("50MB"));
         //设置文件名模式
@@ -224,9 +223,9 @@ public class LoggerBuilder {
         // 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
         encoder.setContext(context);
         //设置格式 格式化日志的logger的输出格式不同
-        if(!name.endsWith(STANDARD_LOG_NAME_END_FIX)){
+        if (!name.endsWith(STANDARD_LOG_NAME_END_FIX)) {
             encoder.setPattern(FILE_LOG_PATTERN);
-        }else {
+        } else {
             encoder.setPattern(STANDARD_FILE_LOG_PATTERN);
         }
         encoder.start();
@@ -255,7 +254,7 @@ public class LoggerBuilder {
 
     private static final LoggerContext LOGGER_CONTEXT = new LoggerContext();
 
-    private static LoggerContext getContext(){
+    private static LoggerContext getContext() {
         return LOGGER_CONTEXT;
     }
 

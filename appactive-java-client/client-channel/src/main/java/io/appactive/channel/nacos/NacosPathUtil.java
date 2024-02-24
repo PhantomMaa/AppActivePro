@@ -41,6 +41,7 @@ public class NacosPathUtil implements PathUtil {
     private String configServerAddress;
 
     private final Properties extras = new Properties();
+
     private final Properties auths = new Properties();
 
     @Override

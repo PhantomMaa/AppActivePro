@@ -24,39 +24,31 @@ import com.alibaba.nacos.api.exception.NacosException;
 import io.appactive.java.api.channel.ConfigReadDataSource;
 import io.appactive.java.api.channel.ConverterInterface;
 import io.appactive.java.api.channel.listener.DataListener;
+import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.support.log.LogUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
 
     private final ConverterInterface<String, T> converterInterface;
 
-    private List<DataListener<T>> dataListeners = new ArrayList<>();
+    private final List<DataListener<T>> dataListeners = new CopyOnWriteArrayList<>();
 
-    private String serverAddr;
-    private String dataId;
-    private String groupId;
-    private String namespaceId;
+    private final String serverAddr;
+    private final String dataId;
+    private final String groupId;
+    private final String namespaceId;
 
     private ConfigService configService;
 
-    /**
-     * TimeUnit.MILLISECONDS
-     */
-    private long timerPeriod = 3000L;
     private T memoryValue = null;
     private long lastModified = 0L;
     private long curLastModified = -1L;
-
-
-    public NacosReadDataSource(String serverAddr, String dataId, String groupId, ConverterInterface<String, T> converterInterface) {
-        this(serverAddr,dataId,groupId,"", converterInterface);
-    }
 
     public NacosReadDataSource(String serverAddr, String dataId, String groupId, String namespaceId, ConverterInterface<String, T> converterInterface) {
         this.serverAddr = serverAddr;
@@ -83,6 +75,7 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
                     LogUtil.warn("get Nacos configInfo {}", configInfo);
                     initMemoryValue(converterInterface.convert(configInfo));
                 }
+
                 @Override
                 public Executor getExecutor() {
                     return null;
@@ -100,13 +93,13 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
         }
         try {
             T oldValue = memoryValue;
-            if(newValue == null){
+            if (newValue == null) {
                 newValue = getValueFromSource();
             }
-            listenerNotify(oldValue,newValue);
+            listenerNotify(oldValue, newValue);
             memoryValue = newValue;
         } catch (IOException e) {
-            LogUtil.error("nacos-read-failed,e:"+e.getMessage(),e);
+            LogUtil.error("nacos-read-failed,e:" + e.getMessage(), e);
         }
     }
 
@@ -119,17 +112,17 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
     }
 
     @Override
-    public T read() throws Exception {
+    public T read() {
         return memoryValue;
     }
 
     @Override
     public void addDataChangedListener(DataListener<T> listener) {
-        if (listener == null){
+        if (listener == null) {
             return;
         }
         dataListeners.add(listener);
-        listener.dataChanged(null,memoryValue);
+        listener.dataChanged(null, memoryValue);
     }
 
     @Override
@@ -138,20 +131,25 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
     }
 
     @Override
-    public T getValueFromSource() throws IOException{
+    public T getValueFromSource() throws IOException {
         try {
+            long timerPeriod = 3000L;
             String content = configService.getConfig(dataId, groupId, timerPeriod);
+            if (StringUtils.isEmpty(content)) {
+                return null;
+            }
+
             return converterInterface.convert(content);
         } catch (NacosException e) {
             LogUtil.warn("getValueFromSource serverAddr: {}, namespaceId: {}, dataId: {}, groupId: {}, Exception ",
-                    serverAddr, namespaceId , dataId, groupId, e);
+                    serverAddr, namespaceId, dataId, groupId, e);
             return null;
         }
     }
 
     @Override
     public void close() throws Exception {
-        if (configService!=null){
+        if (configService != null) {
             configService.shutDown();
         }
     }
