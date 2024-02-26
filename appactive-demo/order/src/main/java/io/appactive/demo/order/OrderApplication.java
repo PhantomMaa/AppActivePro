@@ -63,9 +63,11 @@ public class OrderApplication {
                                     @RequestParam(required = false, defaultValue = "1") Integer number) {
         String routerId = AppContextClient.getRouteId();
         logger.info("buy, routerId: {}, pid: {}, number: {}", routerId, id, number);
-        ResultHolder<String> resultHolder = orderService.buy(rId, id, number);
-        resultHolder.setResult(String.format("routerId %s bought %d of item %s, result: %s", routerId, number, id, resultHolder.getResult()));
-        return resultHolder;
+        ResultHolder<Boolean> resultHolder = orderService.buy(rId, id, number);
+
+        ResultHolder<String> result = new ResultHolder<>();
+        result.setResult(String.format("routerId %s bought %d of item %s, result: %s", routerId, number, id, resultHolder.getResult()));
+        return result;
     }
 
     @RequestMapping("/check")

@@ -22,6 +22,9 @@ import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 import org.slf4j.Logger;
 
+/**
+ * dubbo filter 机制，拦截 dubbo 接口方法
+ */
 @Activate
 public class ChainFilter implements Filter {
 

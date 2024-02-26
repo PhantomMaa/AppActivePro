@@ -19,8 +19,10 @@ package io.appactive.demo.frontend.controller;
 import com.alibaba.fastjson.JSON;
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.frontend.service.FrontEndService;
+import io.appactive.demo.frontend.service.FrontendManager;
 import io.appactive.java.api.base.AppContextClient;
+import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -29,6 +31,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +39,15 @@ import java.util.Map;
 @Controller("/")
 public class FrontController {
 
-    @Autowired
-    private FrontEndService frontEndService;
+    private static final Logger logger = LogUtil.getLogger();
+
+    @Resource
+    private FrontendManager frontendManager;
 
     @Value("${spring.application.name}")
     private String appName;
 
-    @Autowired
+    @Resource
     private Environment env;
 
     private Map<String, String[]> metaData;
@@ -55,23 +60,20 @@ public class FrontController {
     @GetMapping("/list")
     @ResponseBody
     public ResultHolder<List<Product>> list() {
-        // normal
-        return frontEndService.list();
+        return frontendManager.list();
     }
 
     @GetMapping(value = "/detail")
     @ResponseBody
     public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String id) {
-        // unit
-        return frontEndService.detail(AppContextClient.getRouteId(), id);
+        return frontendManager.detail(AppContextClient.getRouteId(), id);
     }
 
     @RequestMapping("/buy")
     @ResponseBody
-    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "12") String id,
-                                    @RequestParam(required = false, defaultValue = "5") Integer number) {
-        // unit
-        return frontEndService.buy(id, number);
+    public ResultHolder<Product> buy(@RequestParam(required = false, defaultValue = "12") String id,
+                                     @RequestParam(required = false, defaultValue = "5") Integer number) {
+        return frontendManager.buy(id, number);
     }
 
     @RequestMapping("/echo")
@@ -121,7 +123,7 @@ public class FrontController {
     @GetMapping("/listProduct")
     public String listProduct(Model model) {
         // normal
-        ResultHolder<List<Product>> resultHolder = frontEndService.list();
+        ResultHolder<List<Product>> resultHolder = frontendManager.list();
 
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("products", resultHolder.getResult());
@@ -131,34 +133,27 @@ public class FrontController {
     }
 
     @GetMapping(value = "/detailProduct")
-    public String detailProduct(@RequestParam(required = false, defaultValue = "12") String id,
-                                @RequestParam(required = false, defaultValue = "false") Boolean hidden,
-                                Model model) {
-        // unit
-        ResultHolder<Product> resultHolder = getProductResultHolder(id, hidden);
-
+    public String detailProduct(@RequestParam(required = false, defaultValue = "12") String id, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), id);
+        String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("product", resultHolder.getResult());
         model.addAttribute("chain", JSON.toJSONString(resultHolder.getChain()));
         model.addAttribute("current", "detailProduct");
+        logger.info("chain : {}", chain);
         return "detail.html";
-    }
-
-    private ResultHolder<Product> getProductResultHolder(String id, Boolean hidden) {
-        return hidden ? frontEndService.detailHidden(id) : frontEndService.detail(AppContextClient.getRouteId(), id);
     }
 
     @RequestMapping("/buyProduct")
     public String buyProduct(@RequestParam(required = false, defaultValue = "12") String pId,
                              @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
-        ResultHolder<String> resultHolder = frontEndService.buy(pId, number);
-        ResultHolder<Product> productHolder = getProductResultHolder(pId, false);
-
+        ResultHolder<Product> resultHolder = frontendManager.buy(pId, number);
+        String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
-        model.addAttribute("msg", resultHolder.getResult());
-        model.addAttribute("product", productHolder.getResult());
-        model.addAttribute("chain", JSON.toJSONString(resultHolder.getChain()));
+        model.addAttribute("product", resultHolder.getResult());
+        model.addAttribute("chain", chain);
         model.addAttribute("current", "buyProduct");
+        logger.info("chain : {}", chain);
         return "buy.html";
     }
 

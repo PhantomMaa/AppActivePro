@@ -20,46 +20,52 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.order.repository.ProductRepository;
+import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Optional;
 
 @Service
-@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","center","routeIndex","0"})
+@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "center", "routeIndex", "0"})
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger logger = LogUtil.getLogger();
 
     @Resource
     ProductRepository productRepository;
 
     @Override
-    public ResultHolder<String> buy(String rId, String pId, Integer number) {
-        String result;
+    public ResultHolder<Boolean> buy(String rId, String pId, Integer number) {
         try {
             Optional<Product> op = productRepository.findById(pId);
-            if (op.isPresent()){
-                // 扣库存
-                Product p = op.get();
-                int oldNum = p.getNumber();
-                int left = oldNum - number;
-                if (left >= 0){
-                    p.setNumber(left);
-                    p = productRepository.save(p);
-                    if (p.getNumber() + number != oldNum){
-                        result = "storage not consist";
-                    }else {
-                        result = "success";
-                    }
-                }else {
-                    result = "sold out";
-                }
-            }else {
-                result = "no such product";
+            if (!op.isPresent()) {
+                logger.warn("no such product");
+                return new ResultHolder<>(false);
             }
-        }catch (Throwable e){
-            result = e.getCause().getCause().getMessage();
+
+            // 扣库存
+            Product p = op.get();
+            int oldNum = p.getNumber();
+            int left = oldNum - number;
+            if (left < 0) {
+                logger.warn("sold out");
+                return new ResultHolder<>(false);
+            }
+
+            p.setNumber(left);
+            p = productRepository.save(p);
+            if (p.getNumber() + number != oldNum) {
+                logger.warn("storage not consist");
+                return new ResultHolder<>(false);
+            } else {
+                return new ResultHolder<>(true);
+            }
+        } catch (Throwable e) {
+            logger.warn("exception: {}", e.getCause().getCause().getMessage());
+            return new ResultHolder<>(false);
         }
-        return new ResultHolder<>(result);
     }
 }

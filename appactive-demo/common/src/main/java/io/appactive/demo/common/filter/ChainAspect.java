@@ -24,6 +24,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+/**
+ * 拦截 frontend service 层方法
+ */
 @Aspect
 @Component
 public class ChainAspect {

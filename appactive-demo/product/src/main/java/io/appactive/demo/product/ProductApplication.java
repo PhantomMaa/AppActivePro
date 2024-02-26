@@ -18,10 +18,7 @@ package io.appactive.demo.product;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.dubbo.ProductServiceCenter;
-import io.appactive.demo.common.service.dubbo.ProductServiceNormal;
-import io.appactive.demo.common.service.dubbo.ProductServiceUnit;
-import io.appactive.demo.common.service.dubbo.ProductServiceUnitHidden;
+import io.appactive.demo.common.service.dubbo.ProductService;
 import io.appactive.java.api.base.AppContextClient;
 import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
@@ -53,16 +50,7 @@ public class ProductApplication {
     }
 
     @Resource
-    private ProductServiceNormal productServiceNormal;
-
-    @Resource
-    private ProductServiceUnit productServiceUnit;
-
-    @Resource
-    private ProductServiceUnitHidden productServiceUnitHidden;
-
-    @Resource
-    private ProductServiceCenter productServiceCenter;
+    private ProductService productService;
 
     @Value("${spring.application.name}")
     private String appName;
@@ -71,38 +59,22 @@ public class ProductApplication {
     @ResponseBody
     public String echo(@RequestParam(required = false, defaultValue = "jack") String user) {
         String s = String.valueOf(user);
-        return String.format("%s get %s", s, productServiceNormal.list().toString());
+        return String.format("%s get %s", s, productService.list().toString());
     }
 
     @RequestMapping("/list")
     @ResponseBody
     public ResultHolder<List<Product>> list() {
-        return productServiceNormal.list();
+        return productService.list();
     }
 
-
-    @RequestMapping(value = "/detailHidden")
-    @ResponseBody
-    public ResultHolder<Product> detailHidden(@RequestParam(required = false, defaultValue = "12") String pId) {
-        logger.info("detailHidden, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
-        return productServiceUnitHidden.detail(pId);
-    }
 
     @RequestMapping(value = "/detail")
     @ResponseBody
     public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String rId,
                                         @RequestParam(required = false, defaultValue = "12") String pId) {
         logger.info("detail, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
-        return productServiceUnit.detail(rId, pId);
-    }
-
-    @RequestMapping("/buy")
-    @ResponseBody
-    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "12") String rId,
-                                    @RequestParam(required = false, defaultValue = "12") String pId,
-                                    @RequestParam(required = false, defaultValue = "5") Integer number) {
-        logger.info("buy, routerId: {}", AppContextClient.getRouteId());
-        return productServiceCenter.buy(rId, pId, number);
+        return productService.detail(rId, pId);
     }
 
     @RequestMapping("/check")

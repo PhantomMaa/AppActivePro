@@ -21,8 +21,10 @@ import io.appactive.demo.common.entity.ResultHolder;
 
 import java.util.List;
 
-public interface ProductServiceNormal {
+public interface ProductService {
 
     ResultHolder<List<Product>> list();
+
+    ResultHolder<Product> detail(String rId, String pId);
 
 }
