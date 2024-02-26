@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appactive.demo.storage;
+package io.appactive.demo.order;
 
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
@@ -39,12 +39,12 @@ import javax.annotation.Resource;
         "io.appactive.demo",
 })
 @Controller("/")
-public class StorageApplication {
+public class OrderApplication {
 
     private static final Logger logger = LogUtil.getLogger();
 
     public static void main(String[] args) {
-        SpringApplication.run(StorageApplication.class, args);
+        SpringApplication.run(OrderApplication.class, args);
     }
 
     @Resource

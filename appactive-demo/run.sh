@@ -41,7 +41,7 @@ fi
 
 if [ "$cmd" == 'stop' ]
 then
-  docker-compose stop storage storage-unit product product-unit frontend frontend-unit gateway
+  docker-compose stop order order-unit product product-unit frontend frontend-unit gateway
 fi
 
 if [ "$cmd" == 'destroy' ]

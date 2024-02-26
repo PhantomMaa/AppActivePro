@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.appactive.demo.storage.service;
+package io.appactive.demo.order.service;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
-import io.appactive.demo.storage.repository.ProductRepository;
+import io.appactive.demo.order.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Service;
 

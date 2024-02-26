@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appactive.demo.storage.repository;
+package io.appactive.demo.order.repository;
 
 import io.appactive.demo.common.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

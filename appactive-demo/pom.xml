@@ -28,7 +28,7 @@
     <modules>
         <module>frontend</module>
         <module>product</module>
-        <module>storage</module>
+        <module>order</module>
         <module>common</module>
     </modules>
 

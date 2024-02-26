@@ -25,11 +25,13 @@ nav_order: 3
 
 - gateway: 多活网关，分发用户流量
 - frontend: 前端应用，接受用户请求，请求到实际数据后返回
-- product: 产品应用，提供三个服务：
-	- 产品列表: 普通服务
-	- 产品详情: 单元服务
-	- 产品下单: 中心服务，依赖库存应用
-- storage: 库存应用，供下单服务扣减库存
+- product: 商品应用，提供三个服务：
+  - 商品列表: 普通服务
+  - 商品详情: 普通服务
+  - 减库存: 中心服务
+- order: 订单应用
+  - 生成订单
+  - 物流单和付款（省略）
 
 为简化起见，gateway 仅部署在 center，其余应用在 center 和 unit 各部署一套。
 
@@ -107,7 +109,7 @@ nav_order: 3
            -Dappactive.unit=unit \
            -Dappactive.app=frontend \
            -Dio.appactive.demo.unitlist=center,unit \
-           -Dio.appactive.demo.applist=frontend,product,storage \
+           -Dio.appactive.demo.applist=frontend,product,order \
            -Dserver.port=8886 \
     -jar frontend-0.2.1.jar
     ```
@@ -145,10 +147,10 @@ nav_order: 3
     ```
     java -Dappactive.channelTypeEnum=NACOS \
          -Dappactive.unit=unit \
-         -Dappactive.app=storage \
+         -Dappactive.app=order \
          -Dspring.datasource.url="jdbc:mysql://127.0.0.1:3306/product?characterEncoding=utf8&useSSL=false&serverTimezone=GMT&activeInstanceId=mysql&activeDbName=product" \
          -Dserver.port=8882 \
-    -jar storage-0.2.1.jar
+    -jar order-0.2.1.jar
     ```
 
 3. 测试
@@ -161,10 +163,10 @@ nav_order: 3
     ```
     # 绕过微服务保护，直接测试数据库保护功能
     curl 127.0.0.1:8882/buy1\?r_id=1 
-    {"result":"routerId 1 bought 1 of item 12, result: success","chain":[{"app":"storage","unitFlag":"center"}]}%
+    {"result":"routerId 1 bought 1 of item 12, result: success","chain":[{"app":"order","unitFlag":"center"}]}%
     
     curl 127.0.0.1:8882/buy1\?r_id=4657 
-    {"result":"routerId 4657 bought 1 of item 12, result: machine:unit,traffic:CENTER,not equals","chain":[{"app":"storage","unitFlag":"unit"}]}
+    {"result":"routerId 4657 bought 1 of item 12, result: machine:unit,traffic:CENTER,not equals","chain":[{"app":"order","unitFlag":"unit"}]}
     
     ```
 

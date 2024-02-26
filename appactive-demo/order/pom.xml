@@ -21,7 +21,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>storage</artifactId>
+    <artifactId>order</artifactId>
     <groupId>io.appactive.demo</groupId>
     <version>0.2.1</version>
 

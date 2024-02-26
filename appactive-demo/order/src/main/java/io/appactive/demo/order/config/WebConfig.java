@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appactive.demo.storage.config;
+package io.appactive.demo.order.config;
 
 import io.appactive.servlet.RequestFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
