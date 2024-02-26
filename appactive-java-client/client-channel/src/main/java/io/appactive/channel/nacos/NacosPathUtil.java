@@ -89,7 +89,7 @@ public class NacosPathUtil implements PathUtil {
         return extras;
     }
 
-    private void initPathValue() throws Exception {
+    private void initPathValue() {
         // 1. from system
         initFromSys();
     }
