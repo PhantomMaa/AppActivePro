@@ -39,7 +39,7 @@ public class InitData implements ApplicationRunner {
     private String unit;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
 
         if (!CENTER_FLAG.equals(unit)){
             return;

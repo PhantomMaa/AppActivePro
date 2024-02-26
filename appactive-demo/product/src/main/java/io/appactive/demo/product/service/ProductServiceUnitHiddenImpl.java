@@ -24,9 +24,9 @@ import io.appactive.java.api.base.AppContextClient;
 import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","unit"})
@@ -34,10 +34,7 @@ public class ProductServiceUnitHiddenImpl implements ProductServiceUnitHidden {
 
     private static final Logger logger = LogUtil.getLogger();
 
-    @Value("${appactive.unit}")
-    private String unit;
-
-    @Autowired
+    @Resource
     ProductRepository productRepository;
 
     @Override

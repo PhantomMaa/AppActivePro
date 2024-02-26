@@ -19,10 +19,8 @@ package io.appactive.demo.product.service;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.common.service.dubbo.ProductServiceCenter;
-import io.appactive.demo.product.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,12 +30,8 @@ public class ProductServiceCenterImpl implements ProductServiceCenter {
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
     private OrderService orderService;
 
-    @Autowired
-    ProductRepository productRepository;
-
     @Override
     public ResultHolder<String> buy(String rId, String pId, int number) {
-        // center
         return orderService.buy(rId, pId, number);
     }
 }

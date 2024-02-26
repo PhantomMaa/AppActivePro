@@ -21,19 +21,19 @@ import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.ProductServiceUnit;
 import io.appactive.demo.product.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","unit","routeIndex","0"})
 public class ProductServiceUnitImpl implements ProductServiceUnit {
 
-    @Autowired
+    @Resource
     ProductRepository productRepository;
 
     @Override
     public ResultHolder<Product> detail(String rId, String pId) {
-        // unit
         return new ResultHolder<>(productRepository.findById(pId).orElse(new Product()));
     }
 

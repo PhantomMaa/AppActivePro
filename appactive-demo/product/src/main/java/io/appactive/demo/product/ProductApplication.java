@@ -25,7 +25,6 @@ import io.appactive.demo.common.service.dubbo.ProductServiceUnitHidden;
 import io.appactive.java.api.base.AppContextClient;
 import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @SpringBootApplication
@@ -52,16 +52,16 @@ public class ProductApplication {
         SpringApplication.run(ProductApplication.class, args);
     }
 
-    @Autowired
+    @Resource
     private ProductServiceNormal productServiceNormal;
 
-    @Autowired
+    @Resource
     private ProductServiceUnit productServiceUnit;
 
-    @Autowired
+    @Resource
     private ProductServiceUnitHidden productServiceUnitHidden;
 
-    @Autowired
+    @Resource
     private ProductServiceCenter productServiceCenter;
 
     @Value("${spring.application.name}")
@@ -71,7 +71,7 @@ public class ProductApplication {
     @ResponseBody
     public String echo(@RequestParam(required = false, defaultValue = "jack") String user) {
         String s = String.valueOf(user);
-        return String.format("%s get %s",s , productServiceNormal.list().toString());
+        return String.format("%s get %s", s, productServiceNormal.list().toString());
     }
 
     @RequestMapping("/list")
@@ -84,8 +84,7 @@ public class ProductApplication {
     @RequestMapping(value = "/detailHidden")
     @ResponseBody
     public ResultHolder<Product> detailHidden(@RequestParam(required = false, defaultValue = "12") String pId) {
-        // unit
-        logger.info("detailHidden, routerId: {}, pId: {}", AppContextClient.getRouteId(),pId);
+        logger.info("detailHidden, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
         return productServiceUnitHidden.detail(pId);
     }
 
@@ -93,16 +92,15 @@ public class ProductApplication {
     @ResponseBody
     public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String rId,
                                         @RequestParam(required = false, defaultValue = "12") String pId) {
-        // unit
-        logger.info("detail, routerId: {}, pId: {}", AppContextClient.getRouteId(),pId);
+        logger.info("detail, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
         return productServiceUnit.detail(rId, pId);
     }
 
     @RequestMapping("/buy")
     @ResponseBody
     public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "12") String rId,
-            @RequestParam(required = false, defaultValue = "12") String pId,
-            @RequestParam(required = false, defaultValue = "5") Integer number) {
+                                    @RequestParam(required = false, defaultValue = "12") String pId,
+                                    @RequestParam(required = false, defaultValue = "5") Integer number) {
         logger.info("buy, routerId: {}", AppContextClient.getRouteId());
         return productServiceCenter.buy(rId, pId, number);
     }
@@ -110,6 +108,6 @@ public class ProductApplication {
     @RequestMapping("/check")
     @ResponseBody
     public String check() {
-        return "OK From "+appName;
+        return "OK From " + appName;
     }
 }

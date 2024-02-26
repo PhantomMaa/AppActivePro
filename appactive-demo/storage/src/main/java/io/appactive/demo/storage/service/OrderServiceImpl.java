@@ -21,23 +21,23 @@ import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.storage.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Optional;
 
 @Service
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive","center","routeIndex","0"})
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired
-    ProductRepository repository;
+    @Resource
+    ProductRepository productRepository;
 
     @Override
     public ResultHolder<String> buy(String rId, String pId, Integer number) {
         String result;
         try {
-            Optional<Product> op = repository.findById(pId);
+            Optional<Product> op = productRepository.findById(pId);
             if (op.isPresent()){
                 // 扣库存
                 Product p = op.get();
@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
                 int left = oldNum - number;
                 if (left >= 0){
                     p.setNumber(left);
-                    p = repository.save(p);
+                    p = productRepository.save(p);
                     if (p.getNumber() + number != oldNum){
                         result = "storage not consist";
                     }else {

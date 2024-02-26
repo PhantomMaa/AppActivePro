@@ -21,7 +21,6 @@ import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.java.api.base.AppContextClient;
 import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,6 +30,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 
 @SpringBootApplication
 @EntityScan("io.appactive.demo.*")
@@ -46,7 +47,7 @@ public class StorageApplication {
         SpringApplication.run(StorageApplication.class, args);
     }
 
-    @Autowired
+    @Resource
     OrderService orderService;
 
     @Value("${spring.application.name}")
@@ -55,23 +56,21 @@ public class StorageApplication {
     /**
      * buy1 is just for bypassing center service protection
      */
-    @RequestMapping(value = {"/buy","/buy1"})
+    @RequestMapping(value = {"/buy", "/buy1"})
     @ResponseBody
-    public ResultHolder<String> buy(
-            @RequestParam(required = false, defaultValue = "jack") String rId,
-            @RequestParam(required = false, defaultValue = "12") String id,
-            @RequestParam(required = false, defaultValue = "1") Integer number
-    ) {
+    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "jack") String rId,
+                                    @RequestParam(required = false, defaultValue = "12") String id,
+                                    @RequestParam(required = false, defaultValue = "1") Integer number) {
         String routerId = AppContextClient.getRouteId();
         logger.info("buy, routerId: {}, pid: {}, number: {}", routerId, id, number);
         ResultHolder<String> resultHolder = orderService.buy(rId, id, number);
-        resultHolder.setResult(String.format("routerId %s bought %d of item %s, result: %s", routerId, number, id ,resultHolder.getResult()));
+        resultHolder.setResult(String.format("routerId %s bought %d of item %s, result: %s", routerId, number, id, resultHolder.getResult()));
         return resultHolder;
     }
 
     @RequestMapping("/check")
     @ResponseBody
     public String check() {
-        return "OK From "+appName;
+        return "OK From " + appName;
     }
 }
