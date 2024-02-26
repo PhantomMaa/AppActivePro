@@ -51,7 +51,6 @@ services:
 
   order:
     build: ./order
-    restart: on-failure:3
     image: app-active/order:0.2.1
     container_name: order
     hostname: order
@@ -70,7 +69,6 @@ services:
       - "mysql"
 
   order-unit:
-    restart: on-failure:3
     image: app-active/order:0.2.1
     container_name: order-unit
     hostname: order-unit
@@ -90,7 +88,6 @@ services:
 
   product:
     build: ./product
-    restart: on-failure:3
     image: app-active/product:0.2.1
     container_name: product
     hostname: product
@@ -109,7 +106,6 @@ services:
       - "order"
 
   product-unit:
-    restart: on-failure:3
     image: app-active/product:0.2.1
     container_name: product-unit
     hostname: product-unit
@@ -129,7 +125,6 @@ services:
 
   frontend:
     build: ./frontend
-    restart: on-failure:3
     image: app-active/frontend:0.2.1
     container_name: frontend
     hostname: frontend
@@ -148,7 +143,6 @@ services:
       - "product"
 
   frontend-unit:
-    restart: on-failure:3
     image: app-active/frontend:0.2.1
     container_name: frontend-unit
     hostname: frontend-unit

@@ -47,11 +47,12 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
                 // normal
                 return invoker.invoke(invocation);
             }
+
             // have traffic rule
-            Result result = processUnitCondition(invocation);
-            if (result != null) {
-                return result;
-            }
+//            Result result = processUnitCondition(invocation);
+//            if (result != null) {
+//                return result;
+//            }
 
             return invoker.invoke(invocation);
         } finally {
