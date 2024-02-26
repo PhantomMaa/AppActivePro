@@ -16,18 +16,19 @@
 
 package io.appactive.demo.common.service.dubbo;
 
+import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 
-public interface OrderService {
+public interface InventoryService {
 
     /**
-     * 下订单
+     * 减库存
      *
      * @param rId
      * @param pId
      * @param number
      * @return
      */
-    ResultHolder<Void> order(String rId, String pId, Integer number);
+    ResultHolder<Product> decrease(String rId, String pId, Integer number);
 
 }

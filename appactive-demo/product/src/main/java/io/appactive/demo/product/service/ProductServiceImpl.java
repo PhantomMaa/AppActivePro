@@ -29,7 +29,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@DubboService(version = "1.0.0", group = "appactive")
+@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "normal", "routeIndex", "0"})
 public class ProductServiceImpl implements ProductService {
 
     private static final Logger logger = LogUtil.getLogger();
@@ -39,13 +39,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResultHolder<List<Product>> list() {
-        return new ResultHolder<>(productRepository.findAll());
+        return ResultHolder.succeed(productRepository.findAll());
     }
 
     @Override
     public ResultHolder<Product> detail(String rId, String pId) {
         logger.info("detail: " + pId + ",rId " + rId);
-        return new ResultHolder<>(productRepository.findById(pId).orElse(new Product()));
+        return ResultHolder.succeed(productRepository.findById(pId).orElse(new Product()));
     }
 
 }

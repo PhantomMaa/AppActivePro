@@ -23,8 +23,20 @@ import java.util.List;
 
 public interface ProductService {
 
+    /**
+     * 商品列表
+     *
+     * @return
+     */
     ResultHolder<List<Product>> list();
 
+    /**
+     * 商品详情
+     *
+     * @param rId
+     * @param pId
+     * @return
+     */
     ResultHolder<Product> detail(String rId, String pId);
 
 }

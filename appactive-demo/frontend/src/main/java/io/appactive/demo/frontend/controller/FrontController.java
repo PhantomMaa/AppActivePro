@@ -23,7 +23,6 @@ import io.appactive.demo.frontend.service.FrontendManager;
 import io.appactive.java.api.base.AppContextClient;
 import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -57,31 +56,10 @@ public class FrontController {
         return "redirect:/listProduct";
     }
 
-    @GetMapping("/list")
-    @ResponseBody
-    public ResultHolder<List<Product>> list() {
-        return frontendManager.list();
-    }
-
-    @GetMapping(value = "/detail")
-    @ResponseBody
-    public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String id) {
-        return frontendManager.detail(AppContextClient.getRouteId(), id);
-    }
-
-    @RequestMapping("/buy")
-    @ResponseBody
-    public ResultHolder<Product> buy(@RequestParam(required = false, defaultValue = "12") String id,
-                                     @RequestParam(required = false, defaultValue = "5") Integer number) {
-        return frontendManager.buy(id, number);
-    }
-
     @RequestMapping("/echo")
     @ResponseBody
-    public ResultHolder<String> echo(
-            @RequestParam(required = false, defaultValue = "echo content") String content
-    ) {
-        return new ResultHolder<>(appName + " : " + content);
+    public ResultHolder<String> echo(@RequestParam(required = false, defaultValue = "echo content") String content) {
+        return ResultHolder.succeed(appName + " : " + content);
     }
 
     @RequestMapping("/check")
@@ -117,7 +95,7 @@ public class FrontController {
     @RequestMapping("/meta")
     @ResponseBody
     public ResultHolder<Object> meta() {
-        return new ResultHolder<>(metaData);
+        return ResultHolder.succeed(metaData);
     }
 
     @GetMapping("/listProduct")
@@ -144,17 +122,29 @@ public class FrontController {
         return "detail.html";
     }
 
-    @RequestMapping("/buyProduct")
-    public String buyProduct(@RequestParam(required = false, defaultValue = "12") String pId,
-                             @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
-        ResultHolder<Product> resultHolder = frontendManager.buy(pId, number);
+    @RequestMapping("/decrease")
+    public String decrease(@RequestParam(required = false, defaultValue = "12") String pId, @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.decrease(pId, number);
         String chain = JSON.toJSONString(resultHolder.getChain());
-        model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
+        model.addAttribute("message", resultHolder.getMessage());
         model.addAttribute("product", resultHolder.getResult());
         model.addAttribute("chain", chain);
-        model.addAttribute("current", "buyProduct");
+        model.addAttribute("current", "decrease");
         logger.info("chain : {}", chain);
-        return "buy.html";
+        return "decrease.html";
+    }
+
+
+    @RequestMapping("/order")
+    public String order(@RequestParam(required = false, defaultValue = "12") String pId, @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.order(pId, number);
+        String chain = JSON.toJSONString(resultHolder.getChain());
+        model.addAttribute("message", resultHolder.getMessage());
+        model.addAttribute("product", resultHolder.getResult());
+        model.addAttribute("chain", chain);
+        model.addAttribute("current", "decrease");
+        logger.info("chain : {}", chain);
+        return "order.html";
     }
 
 

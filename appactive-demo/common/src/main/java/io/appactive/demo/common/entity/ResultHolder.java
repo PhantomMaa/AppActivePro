@@ -20,9 +20,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultHolder <T>  implements Serializable {
+public class ResultHolder<T> implements Serializable {
 
     private T result;
+
+    private Boolean success;
+
+    private String message;
 
     List<Node> chain = new ArrayList<>();
 
@@ -34,6 +38,22 @@ public class ResultHolder <T>  implements Serializable {
         this.result = result;
     }
 
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public List<Node> getChain() {
         return chain;
     }
@@ -42,7 +62,7 @@ public class ResultHolder <T>  implements Serializable {
         this.chain = chain;
     }
 
-    public void addChain(String app, String unitFlag){
+    public void addChain(String app, String unitFlag) {
         chain.add(new Node(app, unitFlag));
     }
 
@@ -53,7 +73,28 @@ public class ResultHolder <T>  implements Serializable {
 
     }
 
-    static class Node implements Serializable{
+    public static <T> ResultHolder<T> succeed(T result) {
+        ResultHolder<T> resultHolder = new ResultHolder<>();
+        resultHolder.success = true;
+        resultHolder.result = result;
+        return resultHolder;
+    }
+
+
+    public static <T> ResultHolder<T> fail(String message) {
+        ResultHolder<T> resultHolder = new ResultHolder<>();
+        resultHolder.success = false;
+        resultHolder.message = message;
+        return resultHolder;
+    }
+
+    public ResultHolder(T result, Boolean success, String message) {
+        this.result = result;
+        this.success = success;
+        this.message = message;
+    }
+
+    static class Node implements Serializable {
         private String app;
         private String unitFlag;
 
@@ -83,22 +124,12 @@ public class ResultHolder <T>  implements Serializable {
 
         @Override
         public String toString() {
-            return "Node{" +
-                    "app='" + app + '\'' +
-                    ", unitFlag='" + unitFlag + '\'' +
-                    '}';
+            return "Node{" + "app='" + app + '\'' + ", unitFlag='" + unitFlag + '\'' + '}';
         }
-    }
-
-    public ResultHolder(T result) {
-        this.result = result;
     }
 
     @Override
     public String toString() {
-        return "ResultHolder{" +
-                "result=" + result +
-                ", chain=" + chain +
-                '}';
+        return "ResultHolder{" + "result=" + result + ", chain=" + chain + '}';
     }
 }

@@ -18,6 +18,7 @@ package io.appactive.demo.frontend.service;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
+import io.appactive.demo.common.service.dubbo.InventoryService;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.common.service.dubbo.ProductService;
 import io.appactive.java.api.base.AppContextClient;
@@ -39,6 +40,9 @@ public class FrontendManager {
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
     private OrderService orderService;
 
+    @DubboReference(version = "1.0.0", group = "appactive", check = false)
+    private InventoryService inventoryService;
+
     public ResultHolder<List<Product>> list() {
         return productService.list();
     }
@@ -47,22 +51,41 @@ public class FrontendManager {
         return productService.detail(rId, pId);
     }
 
-    public ResultHolder<Product> buy(String pId, int number) {
-        ResultHolder<Product> resultProduct = productService.detail(AppContextClient.getRouteId(), pId);
-        if (resultProduct.getResult() == null) {
-            logger.warn("cann't find product, pId : {}", pId);
-            return new ResultHolder<>(null);
-        }
-
-        ResultHolder<Boolean> resultOrder = orderService.buy(AppContextClient.getRouteId(), pId, number);
-        if (!resultOrder.getResult()) {
+    public ResultHolder<Product> decrease(String pId, int number) {
+        ResultHolder<Product> resultInventory = inventoryService.decrease(AppContextClient.getRouteId(), pId, number);
+        if (!resultInventory.getSuccess()) {
             logger.warn("buy failure, pId : {}", pId);
-            return new ResultHolder<>(null);
+            return resultInventory;
         }
 
-        ResultHolder<Product> resultHolder = new ResultHolder<>(resultProduct.getResult());
+        resultInventory.setMessage("success");
+        return resultInventory;
+    }
+
+
+    public ResultHolder<Product> order(String pId, int number) {
+        // 先减库存，再创建订单
+        ResultHolder<Product> resultInventory = inventoryService.decrease(AppContextClient.getRouteId(), pId, number);
+        if (!resultInventory.getSuccess()) {
+            logger.warn("buy failure, pId : {}", pId);
+            return resultInventory;
+        }
+
+        ResultHolder<Product> resultHolder = new ResultHolder<>();
+        resultHolder.setResult(resultInventory.getResult());
+
+        ResultHolder<Void> resultOrder = orderService.order(AppContextClient.getRouteId(), pId, number);
         resultHolder.getChain().addAll(resultOrder.getChain());
-        resultHolder.getChain().addAll(resultProduct.getChain());
+        resultHolder.getChain().addAll(resultInventory.getChain());
+        if (!resultOrder.getSuccess()) {
+            logger.warn("buy failure, pId : {}", pId);
+            resultHolder.setSuccess(false);
+            resultHolder.setMessage(resultOrder.getMessage());
+            return resultHolder;
+        }
+
+        resultHolder.setSuccess(true);
+        resultHolder.setMessage("success");
         return resultHolder;
     }
 }

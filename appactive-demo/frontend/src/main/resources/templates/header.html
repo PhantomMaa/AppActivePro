@@ -162,12 +162,12 @@
             <ul class="nav">
                 <li id="listProduct"><a class="nav-link" th:href="@{'/listProduct'}">商品列表(普通服务)</a></li>
                 <li id="detailProduct"><a class="nav-link" th:href="@{'/detailProduct'}">商品详情(普通服务)</a></li>
-                <li id="buyProduct"><a class="nav-link" th:href="@{'/buyProduct'}">减库存(中心服务)</a></li>
+                <li id="decrease"><a class="nav-link" th:href="@{'/decrease'}">减库存(中心服务)</a></li>
+                <li id="order"><a class="nav-link" th:href="@{'/order'}">下单(单元服务)</a></li>
                 <li><input type="text" class="form-control" placeholder="路由ID" id="routerId" onchange="setMeta()" onblur="setMeta()"></li>
             </ul>
         </div>
     </nav>
-    <input hidden th:value="${result}" id="result"/>
     <input hidden th:value="${chain}" id="chain"/>
     <input hidden th:value="${current}" id="current"/>
     <br>

@@ -31,7 +31,6 @@ services:
   sharding-proxy:
     image: apache/shardingsphere-proxy:5.4.1
     container_name: sharding-proxy
-    restart: always
     ports:
       - 3307:3307
     volumes:

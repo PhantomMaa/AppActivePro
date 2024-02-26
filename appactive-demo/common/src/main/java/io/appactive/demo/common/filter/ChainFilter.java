@@ -30,17 +30,17 @@ public class ChainFilter implements Filter {
 
     private static final Logger logger = LogUtil.getLogger();
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         Result result = invoker.invoke(invocation);
-        Object object = result.getValue();
-        logger.info(object.toString());
+        Object resultValue = result.getValue();
+        logger.info("resultValue : {}", resultValue.toString());
 
-        if (object instanceof ResultHolder) {
-            ResultHolder resultHolder = (ResultHolder) object;
+        if (resultValue instanceof ResultHolder) {
+            ResultHolder resultHolder = (ResultHolder) resultValue;
             resultHolder.addChain(System.getenv("appactive.app"), System.getenv("appactive.unit"));
-            result.setValue(resultHolder);
-            logger.info("ChainFilter: " + resultHolder);
+            logger.info("resultHolder : {}", resultHolder);
         }
         return result;
     }

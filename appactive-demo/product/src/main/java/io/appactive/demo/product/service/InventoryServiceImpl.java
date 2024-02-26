@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.appactive.demo.order.service;
+package io.appactive.demo.product.service;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.dubbo.OrderService;
-import io.appactive.demo.order.repository.ProductRepository;
+import io.appactive.demo.common.service.dubbo.InventoryService;
+import io.appactive.demo.product.repository.ProductRepository;
 import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
@@ -29,8 +29,8 @@ import javax.annotation.Resource;
 import java.util.Optional;
 
 @Service
-@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "unit", "routeIndex", "0"})
-public class OrderServiceImpl implements OrderService {
+@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "center", "routeIndex", "0"})
+public class InventoryServiceImpl implements InventoryService {
 
     private static final Logger logger = LogUtil.getLogger();
 
@@ -38,7 +38,8 @@ public class OrderServiceImpl implements OrderService {
     ProductRepository productRepository;
 
     @Override
-    public ResultHolder<Void> order(String rId, String pId, Integer number) {
+    public ResultHolder<Product> decrease(String rId, String pId, Integer number) {
+        logger.info("decrease rId : {}, pId : {}, number : {}", rId, pId, number);
         try {
             Optional<Product> op = productRepository.findById(pId);
             if (!op.isPresent()) {
@@ -52,16 +53,16 @@ public class OrderServiceImpl implements OrderService {
             int left = oldNum - number;
             if (left < 0) {
                 logger.warn("sold out");
-                return ResultHolder.fail("sold out");
+                return new ResultHolder<>(p, false, "sold out");
             }
 
             p.setNumber(left);
             p = productRepository.save(p);
             if (p.getNumber() + number != oldNum) {
                 logger.warn("storage not consist");
-                return ResultHolder.fail("storage not consist");
+                return new ResultHolder<>(p, false, "storage not consist");
             } else {
-                return ResultHolder.succeed(null);
+                return ResultHolder.succeed(p);
             }
         } catch (Throwable e) {
             String errMessage = e.getCause().getCause().getMessage();
