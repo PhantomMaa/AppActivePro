@@ -32,15 +32,16 @@
                         <span>价格: </span><span th:text="${product.price}" class="badge text-bg-success"></span>
                         <span>库存: </span><span th:text="${product.number}" class="badge text-bg-info"></span>
                         <a th:href="@{'/decrease?pId=' + ${product.id}}" class="btn btn-primary" style="text-align: center">
-                            购买
+                            减库存
                         </a>
                     </p>
                 </div>
             </div>
         </div>
     </div>
+    <br/>
     <div class="row" style="color: #bd2d31 !important; font-size: large">
-        购买结果：<span class="modal-title" th:text="${message}"></span>
+        减库存结果：<span class="modal-title" th:text="${message}"></span>
     </div>
 </div>
 <header th:replace="header.html :: pageTraffic"></header>

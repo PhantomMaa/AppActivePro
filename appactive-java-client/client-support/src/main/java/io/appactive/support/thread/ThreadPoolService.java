@@ -24,11 +24,15 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.appactive.support.log.LogUtil;
 import io.appactive.support.thread.inner.DefaultThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ThreadPoolService {
+
+
+    private final static Logger logger = LoggerFactory.getLogger(ThreadPoolService.class);
 
     private static final ExecutorService SERVICE_LISTENER_THREAD_POOL = createServiceListenerThreadPool();
 
@@ -40,7 +44,7 @@ public class ThreadPoolService {
      */
     public static ScheduledExecutorService createSingleThreadScheduledExecutor(String threadName) {
         return new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory(threadName),
-            getLoggerRejectedExecutionHandler());
+                getLoggerRejectedExecutionHandler());
     }
 
     /**
@@ -60,17 +64,12 @@ public class ThreadPoolService {
      */
     private static ExecutorService createServiceListenerThreadPool() {
         return new ThreadPoolExecutor(1, 3, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(1000), new
-            DefaultThreadFactory("service-listener"),
-            getLoggerRejectedExecutionHandler());
+                DefaultThreadFactory("service-listener"),
+                getLoggerRejectedExecutionHandler());
     }
 
     private static RejectedExecutionHandler getLoggerRejectedExecutionHandler() {
-        return new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                LogUtil.warn("Task rejected, task class: {}", r.getClass());
-            }
-        };
+        return (r, executor) -> logger.warn("Task rejected, task class: {}", r.getClass());
     }
 
     public static ExecutorService getServiceListenerThreadPool() {

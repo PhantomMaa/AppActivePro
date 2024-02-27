@@ -33,12 +33,12 @@ import io.appactive.java.api.rule.traffic.ForbiddenRuleService;
 import io.appactive.java.api.rule.traffic.TrafficRouteRuleService;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rule.ClientRuleService;
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MysqlConnectionServiceImpl implements MysqlConnectionService, SQLProtectService {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final TrafficRouteRuleService trafficRouteRuleService = ClientRuleService.getTrafficRouteRuleService();
     private final AbstractMachineUnitRuleService machineUnitRuleService = ClientRuleService.getMachineUnitRuleService();

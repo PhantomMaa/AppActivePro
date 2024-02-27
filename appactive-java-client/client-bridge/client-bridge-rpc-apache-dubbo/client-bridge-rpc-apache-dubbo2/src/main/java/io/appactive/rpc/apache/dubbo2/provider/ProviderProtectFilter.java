@@ -10,12 +10,13 @@ import io.appactive.java.api.rule.traffic.TrafficRouteRuleService;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rpc.apache.dubbo2.utils.ModelUtil;
 import io.appactive.rule.ClientRuleService;
-import io.appactive.support.log.LogUtil;
 import io.appactive.support.sys.SysUtil;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 import org.apache.dubbo.rpc.model.ProviderModel;
 import org.apache.dubbo.rpc.model.ServiceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Map;
@@ -28,15 +29,17 @@ import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER;
 @Activate(group = PROVIDER, order = 500)
 public class ProviderProtectFilter implements Filter, RPCProviderProtectService<Invocation, ProviderModel, ServiceMetadata> {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private static final String CURRENT_IP = SysUtil.getCurrentIP();
 
     private final TrafficRouteRuleService trafficRouteRuleService = ClientRuleService.getTrafficRouteRuleService();
     private final AbstractMachineUnitRuleService machineUnitRuleService = ClientRuleService.getMachineUnitRuleService();
     private final TrafficMachineService trafficMachineService = new TrafficMachineService(trafficRouteRuleService,
-        machineUnitRuleService);
+            machineUnitRuleService);
 
     public ProviderProtectFilter() {
-        LogUtil.info("init-ProviderProtectFilter");
+        logger.info("init-ProviderProtectFilter");
     }
 
     @Override
@@ -89,10 +92,10 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
         // 单元化保护
         try {
             Map<String, Object> attachments = serviceMetadata.getAttachments();
-            String resourceActiveType = (String)attachments.get(RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY);
+            String resourceActiveType = (String) attachments.get(RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY);
             if (resourceActiveType == null) {
                 // 1. 普通服务不处理
-                return normalResourceProtect(invocation,serviceMetadata);
+                return normalResourceProtect(invocation, serviceMetadata);
             }
 
             if (resourceActiveType.equals(ResourceActiveType.CENTER_RESOURCE_TYPE)) {
@@ -100,9 +103,9 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
             }
 
             if (resourceActiveType.equals(ResourceActiveType.UNIT_RESOURCE_TYPE)) {
-                return unitResourceProtect(invocation,providerModel);
+                return unitResourceProtect(invocation, providerModel);
             }
-            return normalResourceProtect(invocation,serviceMetadata);
+            return normalResourceProtect(invocation, serviceMetadata);
 
         } catch (Throwable t) {
             String serviceUniqueName = serviceMetadata.getServiceKey();
@@ -110,10 +113,10 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
             String clientIp = RpcContext.getContext().getRemoteHost();
 
             String errorMsg = MessageFormat.format(
-                "[Dubbo-Provider-{0}] ERROR, The request for [{1}] [{2}] from [{3}] ,currentUnit [{4}],error:{5}",
-                CURRENT_IP, serviceUniqueName, methodName, clientIp,
-                machineUnitRuleService.getCurrentUnit(),
-                t.getMessage());
+                    "[Dubbo-Provider-{0}] ERROR, The request for [{1}] [{2}] from [{3}] ,currentUnit [{4}],error:{5}",
+                    CURRENT_IP, serviceUniqueName, methodName, clientIp,
+                    machineUnitRuleService.getCurrentUnit(),
+                    t.getMessage());
             return errorResult(invocation, errorMsg, t);
         }
     }
@@ -127,10 +130,10 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
         String routeId = getRouteId(providerModel, invocation);
         if (StringUtils.isBlank(routeId)) {
             String errorMsg = MessageFormat.format(
-                "[Dubbo-Provider-{0}] The request for [{1}] [{2}] from [{3}] is " +
-                    "rejected by UnitRule Protection, because unit id is empty",
-                CURRENT_IP, serviceUniqueName, methodName, clientIp);
-            LogUtil.error(errorMsg);
+                    "[Dubbo-Provider-{0}] The request for [{1}] [{2}] from [{3}] is " +
+                            "rejected by UnitRule Protection, because unit id is empty",
+                    CURRENT_IP, serviceUniqueName, methodName, clientIp);
+            logger.error(errorMsg);
         }
         if (trafficMachineService.isInCurrentUnit(routeId)) {
 
@@ -138,7 +141,7 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
             return null;
         }
         return doNotInCurrentUnit(clientIp, serviceUniqueName, methodName, routeId,
-            invocation);
+                invocation);
 
     }
 
@@ -146,7 +149,9 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
         String routerId;
 
         String routeIdFromParams = getFromParams(providerModel, invocation);
-        if (routeIdFromParams != null) { return routeIdFromParams; }
+        if (routeIdFromParams != null) {
+            return routeIdFromParams;
+        }
 
         // 2.  consumer 透传过来的值
         Object uid = invocation.getObjectAttachment((RPCConstant.CONSUMER_REMOTE_ROUTE_ID_KEY));
@@ -162,8 +167,8 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
     private String getFromParams(ProviderModel providerModel, Invocation invocation) {
         String routerId;
         Object[] args = invocation.getArguments();
-        String routeKey = (String)providerModel.getServiceMetadata().getAttachments().get(
-            RPCConstant.URL_ROUTE_INDEX_KEY);
+        String routeKey = (String) providerModel.getServiceMetadata().getAttachments().get(
+                RPCConstant.URL_ROUTE_INDEX_KEY);
         int route = -1;
         if (routeKey != null && !routeKey.isEmpty()) {
             route = Integer.parseInt(routeKey);
@@ -178,17 +183,17 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
     private Result doNotInCurrentUnit(String clientIp, String serviceUniqueName, String methodName, String routeId,
                                       Invocation invocation) {
         String errorMsg = MessageFormat.format("[Dubbo-Provider-{0}] The request for [{1}] [{2}] from [{3}] is " +
-                "rejected by UnitRule Protection, targetUnit [{4}], currentUnit [{5}].",
-            CURRENT_IP, serviceUniqueName, methodName, clientIp, trafficRouteRuleService.getUnitByRouteId(routeId),
-            machineUnitRuleService.getCurrentUnit());
+                        "rejected by UnitRule Protection, targetUnit [{4}], currentUnit [{5}].",
+                CURRENT_IP, serviceUniqueName, methodName, clientIp, trafficRouteRuleService.getUnitByRouteId(routeId),
+                machineUnitRuleService.getCurrentUnit());
         return errorResult(invocation, errorMsg);
     }
 
     private Result doNotInCenterUnit(String clientIp, String serviceUniqueName, String methodName,
                                      Invocation invocation) {
         String errorMsg = MessageFormat.format("[Dubbo-Provider-{0}] The request for [{1}] [{2}] from [{3}] is " +
-                "rejected by UnitRule-CENTER Protection, targetUnit [CENTER], currentUnit [{4}].",
-            CURRENT_IP, serviceUniqueName, methodName, clientIp, machineUnitRuleService.getCurrentUnit());
+                        "rejected by UnitRule-CENTER Protection, targetUnit [CENTER], currentUnit [{4}].",
+                CURRENT_IP, serviceUniqueName, methodName, clientIp, machineUnitRuleService.getCurrentUnit());
 
         return errorResult(invocation, errorMsg);
 
@@ -200,9 +205,9 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
 
     private AsyncRpcResult errorResult(Invocation invocation, String errorMsg, Throwable t) {
         if (t == null) {
-            LogUtil.error(errorMsg);
+            logger.error(errorMsg);
         } else {
-            LogUtil.error(errorMsg, t);
+            logger.error(errorMsg, t);
         }
         AppResponse a = new AppResponse(errorMsg);
         return AsyncRpcResult.newDefaultAsyncResult(a, invocation);

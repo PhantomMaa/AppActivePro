@@ -25,23 +25,19 @@ import io.appactive.java.api.bridge.rpc.constants.constant.RPCConstant;
 import io.appactive.java.api.bridge.rpc.consumer.RPCAddressCallBack;
 import io.appactive.java.api.bridge.rpc.consumer.RPCAddressFilterByUnitService;
 import io.appactive.java.api.base.constants.AppactiveConstant;
-import io.appactive.java.api.base.enums.MiddleWareTypeEnum;
 import io.appactive.java.api.base.AppContextClient;
 import io.appactive.java.api.base.constants.ResourceActiveType;
-import io.appactive.java.api.rule.machine.AbstractMachineUnitRuleService;
 import io.appactive.java.api.rule.traffic.TrafficRouteRuleService;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rpc.base.consumer.bo.AddressActive;
 import io.appactive.rule.ClientRuleService;
 import io.appactive.support.lang.CollectionUtils;
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByUnitService<T> {
 
-    private static final Logger logger = LogUtil.getLogger();
-
-    private final MiddleWareTypeEnum middleWareTypeEnum;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private RPCAddressCallBack<T> rpcUnitCellCallBack;
 
@@ -51,21 +47,15 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
 
     private final TrafficRouteRuleService trafficRouteRuleService = ClientRuleService.getTrafficRouteRuleService();
 
-    private final AbstractMachineUnitRuleService machineUnitRuleService = ClientRuleService.getMachineUnitRuleService();
-
-    public RPCAddressFilterByUnitServiceImpl(MiddleWareTypeEnum middleWareTypeEnum) {
-        this.middleWareTypeEnum = middleWareTypeEnum;
-    }
-
     @Override
     public void initAddressCallBack(RPCAddressCallBack<T> callBack) {
         this.rpcUnitCellCallBack = callBack;
     }
 
     @Override
-    public Boolean refreshAddressList(String providerAppName, String servicePrimaryName, List<T> list, String version, String resourceActive) {
+    public Boolean refreshAddressList(String servicePrimaryName, List<T> list, String version, String resourceActive) {
         if (CollectionUtils.isEmpty(list)) {
-            emptyCache(providerAppName, servicePrimaryName);
+            emptyCache(servicePrimaryName);
         }
         if (version != null && SERVICE_REMOTE_ADDRESS_MAP.containsKey(servicePrimaryName)) {
             AddressActive<T> addressActive = SERVICE_REMOTE_ADDRESS_MAP.get(servicePrimaryName);
@@ -79,70 +69,39 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
         String resourceType = resourceActive == null ? getResourceType(list) : resourceActive;
         Map<String, List<T>> unitServersMap = transToUnitFlagServerListMap(list);
 
-        AddressActive<T> addressActive = new AddressActive<>(resourceType, unitServersMap, list);
-
-        SERVICE_REMOTE_ADDRESS_MAP.put(servicePrimaryName, addressActive);
-        logger.info("caches of providerAppName:{}, servicePrimaryName:{} just got refreshed, new version:{}", providerAppName, servicePrimaryName, version);
+        SERVICE_REMOTE_ADDRESS_MAP.put(servicePrimaryName, new AddressActive<>(resourceType, unitServersMap, list));
+        logger.info("servicePrimaryName : {}, cache got refreshed, new version : {}, SERVICE_REMOTE_ADDRESS_MAP : {}", servicePrimaryName, version, SERVICE_REMOTE_ADDRESS_MAP);
         return true;
     }
 
     @Override
-    public List<T> addressFilter(String providerAppName, String servicePrimaryName, String routeId) {
+    public List<T> addressFilter(String servicePrimaryName, String routeId) {
         AddressActive<T> addressActive = SERVICE_REMOTE_ADDRESS_MAP.get(servicePrimaryName);
         if (addressActive == null) {
             return null;
         }
+
         String resourceType = addressActive.getResourceType();
         Map<String, List<T>> unitServersMap = addressActive.getUnitServersMap();
-        List<T> originalList = addressActive.getOriginalList();
+        List<T> result = getFilterResult(servicePrimaryName, resourceType, unitServersMap, routeId);
 
-        List<T> result = getFilterResult(servicePrimaryName, resourceType, unitServersMap, originalList, routeId);
-
-        logServer("server list after filtering:", result);
+        logServer(result);
         return result;
     }
 
     @Override
-    public List<T> addressFilter(String providerAppName, String servicePrimaryName, List<T> list, String routeId) {
-        if (this.middleWareTypeEnum == null || this.rpcUnitCellCallBack == null || StringUtils.isBlank(providerAppName) || StringUtils.isBlank(servicePrimaryName)) {
-            return list;
-        }
-
-        String resourceType = getResourceType(list);
-
-        // unit: originalServers
-        Map<String, List<T>> unitServersMap = transToUnitFlagServerListMap(list);
-
-        // 2. 优先及单元化处理过滤
-        List<T> result = getFilterResult(servicePrimaryName, resourceType, unitServersMap, list, routeId);
-
-        logServer("route result afterZeroFilterServerList:", result);
-        return result;
-    }
-
-
-    @Override
-    public Boolean emptyCache(String providerAppName, String servicePrimaryName) {
+    public Boolean emptyCache(String servicePrimaryName) {
         SERVICE_REMOTE_ADDRESS_MAP.remove(servicePrimaryName);
         return true;
     }
 
 
-    private List<T> getFilterResult(String servicePrimaryName, String resourceType, Map<String, List<T>> unitServersMap, List<T> originalServers, String routeId) {
-        if (StringUtils.isBlank(resourceType) || ResourceActiveType.NORMAL_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {
-            // 普通服务 或 是未单元化的服务
-            return commonServers(unitServersMap, originalServers);
-        }
-        if (ResourceActiveType.CENTER_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {
-            return centerServers(unitServersMap, servicePrimaryName);
-        }
-
+    private List<T> getFilterResult(String servicePrimaryName, String resourceType, Map<String, List<T>> unitServersMap, String routeId) {
         if (ResourceActiveType.UNIT_RESOURCE_TYPE.equalsIgnoreCase(resourceType)) {
             return unitServers(unitServersMap, servicePrimaryName, routeId);
+        } else {
+            return centerServers(unitServersMap, servicePrimaryName);
         }
-
-        // 不在上述当中，默认为普通服务
-        return commonServers(unitServersMap, originalServers);
     }
 
     private List<T> unitServers(Map<String, List<T>> unitServersMap, String servicePrimaryName, String routeId) {
@@ -151,15 +110,15 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
             routeId = AppContextClient.getRouteId();
         }
         if (routeId == null) {
-            // 无routeId 在多活里面 直接报错，无单元化路由目标地址，
-            String msg = MessageFormat.format("service:{0},not have routeId", servicePrimaryName);
+            // 无routeId 在多活里面 直接报错，无单元化路由目标地址
+            String msg = MessageFormat.format("service : {0}, not have routeId", servicePrimaryName);
             logger.error(msg);
             throw new AppactiveException(msg);
         }
 
         String targetUnit = trafficRouteRuleService.getUnitByRouteId(routeId);
         if (StringUtils.isBlank(targetUnit)) {
-            String msg = MessageFormat.format("service:{0},routeId:{1},targetUnit is null", servicePrimaryName, routeId);
+            String msg = MessageFormat.format("service : {0}, routeId : {1}, targetUnit is null", servicePrimaryName, routeId);
             logger.error(msg);
             throw new AppactiveException(msg);
         }
@@ -167,8 +126,8 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
         targetUnit = targetUnit.toUpperCase();
         List<T> unitServers = unitServersMap.get(targetUnit);
         if (CollectionUtils.isEmpty(unitServers)) {
-            /* 单元地址池没有目标单元的地址，不进行兜底*/
-            String msg = MessageFormat.format("service:{0},routeId:{1},targetUnit:{2},list is null", servicePrimaryName, routeId, targetUnit);
+            // 单元地址池没有目标单元的地址，不进行兜底
+            String msg = MessageFormat.format("service : {0}, routeId : {1}, targetUnit : {2}, list is null", servicePrimaryName, routeId, targetUnit);
             logger.error(msg);
             throw new AppactiveException(msg);
         }
@@ -181,38 +140,18 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
         List<T> invokers = unitServersMap.get(centerFlag);
         if (CollectionUtils.isEmpty(invokers)) {
             // 无中心服务
-            String msg = MessageFormat.format("service:{0},not have center list", servicePrimaryName);
+            String msg = MessageFormat.format("service : {0}, not have center list", servicePrimaryName);
             logger.error(msg);
-            /* 说明代码哪里有问题, 或者用户配置错误了writeMode*/
+
+            // 说明代码哪里有问题, 或者用户配置错误了writeMode
             throw new AppactiveException(msg);
         }
 
         return invokers;
     }
 
-    private List<T> commonServers(Map<String, List<T>> unitServersMap, List<T> originalServers) {
-        // consumer 本机所在单元
-        String currentUnit = machineUnitRuleService.getCurrentUnit();
-        if (currentUnit == null) {
-            // 1 不存在单元标，切0后，随机调用下游
-            logger.info("no unitFlag for current consumer, executing random calling");
-            return originalServers;
-        }
-        // 2 存在单元标
-        currentUnit = currentUnit.toUpperCase();
-
-        List<T> currentUnitServers = unitServersMap.get(currentUnit);
-        if (CollectionUtils.isEmpty(currentUnitServers)) {
-            // 2-1. 本单元没机器，则随机全局调用
-            logger.info("no provider for current unit[{}] of consumer, executing random calling", currentUnit);
-            return originalServers;
-        }
-        logger.info("executing current-unit-preferable calling");
-        // 单元内优先调用
-        return currentUnitServers;
-    }
-
     private Map<String, List<T>> transToUnitFlagServerListMap(List<T> servers) {
+        logger.info("servers : {}", servers);
         Map<String, List<T>> unitServersMap = new ConcurrentHashMap<>();
         for (T server : servers) {
             // get unitName
@@ -228,6 +167,7 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
             List<T> currentUnitServers = unitServersMap.computeIfAbsent(unitName, k -> new ArrayList<>());
             currentUnitServers.add(server);
         }
+        logger.info("unitServersMap : {}", unitServersMap);
         return unitServersMap;
     }
 
@@ -237,6 +177,7 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
         if (StringUtils.isBlank(key)) {
             return null;
         }
+
         return rpcUnitCellCallBack.getMetaMapValue(server, key);
     }
 
@@ -245,17 +186,13 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
         return SERVICE_REMOTE_ADDRESS_MAP.keySet();
     }
 
-
-    /**
-     * getResourceType
-     */
     protected String getResourceType(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {
             return null;
         }
+
         for (T invoker : list) {
-            String metaMapValue = rpcUnitCellCallBack.getMetaMapValue(invoker,
-                    RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY);
+            String metaMapValue = rpcUnitCellCallBack.getMetaMapValue(invoker, RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY);
             if (StringUtils.isNotBlank(metaMapValue)) {
                 return metaMapValue;
             }
@@ -264,7 +201,7 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
     }
 
 
-    private void logServer(String prefix, List<T> servers) {
+    private void logServer(List<T> servers) {
         if (CollectionUtils.isEmpty(servers)) {
             return;
         }
@@ -276,6 +213,6 @@ public class RPCAddressFilterByUnitServiceImpl<T> implements RPCAddressFilterByU
             }
             toLog.add(serverStr);
         }
-        logger.info(prefix + "{}", toLog);
+        logger.info("server list after filtering : " + "{}", toLog);
     }
 }

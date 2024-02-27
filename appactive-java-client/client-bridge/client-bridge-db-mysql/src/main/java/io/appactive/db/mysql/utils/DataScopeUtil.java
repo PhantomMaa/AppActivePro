@@ -17,19 +17,18 @@
 package io.appactive.db.mysql.utils;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import io.appactive.db.mysql.constants.MysqlConstant;
 import io.appactive.db.mysql.utils.JDBCUrlSplitterUtil.JdbcUrlSpiltResult;
 import io.appactive.java.api.bridge.db.constants.DataScope;
 import io.appactive.java.api.utils.lang.StringUtils;
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataScopeUtil {
 
-    private static Logger logger = LogUtil.getLogger();
+    private final static Logger logger = LoggerFactory.getLogger(DataScopeUtil.class);
 
     public static DataScope getDataScopeFromUrl(String url){
         Map<String, String> connPropMap = getConnPropMap(url);
@@ -43,8 +42,7 @@ public class DataScopeUtil {
     }
 
 
-    private static DataScope initDataScope(String instanceId, String dbName, String portName,
-                                           Map<String, String> connPropMap) {
+    private static DataScope initDataScope(String instanceId, String dbName, String portName, Map<String, String> connPropMap) {
         instanceId = instanceId.toLowerCase();
         dbName = dbName.toLowerCase();
         portName = portName.toLowerCase();
@@ -92,7 +90,7 @@ public class DataScopeUtil {
     }
 
     private static Map<String, String> getConnPropMap(String url) {
-        Map<String, String> connPropMap = new HashMap<String, String>();
+        Map<String, String> connPropMap = new HashMap<>();
         int idxOfQuestionMark = StringUtils.indexOf(url, '?');
         if (idxOfQuestionMark == StringUtils.INDEX_NOT_FOUND) {
             return connPropMap;
@@ -103,8 +101,7 @@ public class DataScopeUtil {
         }
         connPropStr = connPropStr.trim();
         String[] connPropArr = connPropStr.split("&");
-        for (int i = 0; i < connPropArr.length; i++) {
-            String connPropVal = connPropArr[i];
+        for (String connPropVal : connPropArr) {
             String[] keyAndVal = connPropVal.split("=");
             String key = keyAndVal[0];
             String val = keyAndVal[1];

@@ -16,64 +16,51 @@
 
 package io.appactive.rpc.apache.dubbo2.consumer;
 
-import java.text.MessageFormat;
-import java.util.List;
-
-import io.appactive.java.api.base.enums.MiddleWareTypeEnum;
+import io.appactive.java.api.base.AppContextClient;
 import io.appactive.java.api.base.exception.ExceptionFactory;
 import io.appactive.java.api.bridge.rpc.constants.constant.RPCConstant;
 import io.appactive.java.api.bridge.rpc.consumer.RPCAddressFilterByUnitService;
-import io.appactive.java.api.base.AppContextClient;
-import io.appactive.java.api.rule.TrafficMachineService;
-import io.appactive.java.api.rule.machine.AbstractMachineUnitRuleService;
 import io.appactive.java.api.rule.traffic.TrafficRouteRuleService;
 import io.appactive.rpc.apache.dubbo2.consumer.callback.Dubbo2AddressCallBack;
 import io.appactive.rpc.base.consumer.RPCAddressFilterByUnitServiceImpl;
 import io.appactive.rule.ClientRuleService;
 import io.appactive.support.lang.CollectionUtils;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.Router;
-import org.apache.dubbo.rpc.model.ApplicationModel;
-import org.apache.dubbo.rpc.model.ConsumerModel;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.MessageFormat;
+import java.util.List;
 
 public class ConsumerRouter implements Router {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final int CONSUMER_ROUTER_DEFAULT_PRIORITY = -10;
-    private boolean force = false;
-    private URL url;
+
+    private final URL url;
 
     private final TrafficRouteRuleService trafficRouteRuleService = ClientRuleService.getTrafficRouteRuleService();
-    private final AbstractMachineUnitRuleService machineUnitRuleService = ClientRuleService.getMachineUnitRuleService();
-    private final TrafficMachineService trafficMachineService = new TrafficMachineService(trafficRouteRuleService,
-        machineUnitRuleService);
 
-    private RPCAddressFilterByUnitService addressFilterByUnitService = null;
+    private RPCAddressFilterByUnitService addressFilterByUnitService = new RPCAddressFilterByUnitServiceImpl();
 
-    private Dubbo2AddressCallBack callBack;
+    private final Dubbo2AddressCallBack callBack = new Dubbo2AddressCallBack();
 
-    private ConsumerModel consumerModel;
-
-    private String servicePrimaryKey;
+    private final String servicePrimaryKey;
 
     private Integer routeIdIndex = null;
 
     public ConsumerRouter(URL referenceUrl) {
         this.url = referenceUrl;
         this.servicePrimaryKey = referenceUrl.getServiceKey();
-        this.consumerModel = ApplicationModel.getConsumerModel(servicePrimaryKey);
-        this.callBack = new Dubbo2AddressCallBack();
-        logger.info("init-ConsumerUnitRouter");
-    }
 
-    //-------------------------------------------------------------------------------------------
+        logger.info("init-ConsumerUnitRouter, url : {}", url);
+    }
 
     @Override
     public URL getUrl() {
@@ -83,16 +70,15 @@ public class ConsumerRouter implements Router {
     @Override
     public <T> List<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         String indexValue = null;
-        if (this.routeIdIndex != null && this.routeIdIndex >= 0){
+        if (this.routeIdIndex != null && this.routeIdIndex >= 0) {
             // 获得显示透传的route
             indexValue = getRouteIndexValue(invocation);
-        }else {
+        } else {
             // 隐式透传
             RpcContext.getContext().setAttachment(RPCConstant.CONSUMER_REMOTE_ROUTE_ID_KEY, AppContextClient.getRouteId());
         }
 
-        List<Invoker<T>> list = addressFilterByUnitService.addressFilter(null, servicePrimaryKey,indexValue);
-        return list;
+        return (List<Invoker<T>>) addressFilterByUnitService.addressFilter(servicePrimaryKey, indexValue);
     }
 
     @Override
@@ -102,7 +88,7 @@ public class ConsumerRouter implements Router {
 
     @Override
     public boolean isForce() {
-        return force;
+        return false;
     }
 
     @Override
@@ -118,23 +104,23 @@ public class ConsumerRouter implements Router {
             // 非单元化，不处理
             return;
         }
-        if (addressFilterByUnitService == null) {
-            addressFilterByUnitService = new RPCAddressFilterByUnitServiceImpl<T>(MiddleWareTypeEnum.DUBBO);
-            addressFilterByUnitService.initAddressCallBack(callBack);
-        }
-        addressFilterByUnitService.refreshAddressList(null, servicePrimaryKey, invokers, null, null);
+
+        addressFilterByUnitService.initAddressCallBack(callBack);
+        addressFilterByUnitService.refreshAddressList(servicePrimaryKey, invokers, null, null);
     }
 
     private <T> void initRouteIdIndex(List<Invoker<T>> invokers) {
-        if (this.routeIdIndex != null){
+        if (this.routeIdIndex != null) {
             return;
         }
-        if (CollectionUtils.isEmpty(invokers)){
+
+        if (CollectionUtils.isEmpty(invokers)) {
             return;
         }
+
         for (Invoker<T> invoker : invokers) {
             String metaMapValue = callBack.getMetaMapValue(invoker, RPCConstant.URL_ROUTE_INDEX_KEY);
-            if (metaMapValue != null){
+            if (metaMapValue != null) {
                 this.routeIdIndex = Integer.parseInt(metaMapValue);
                 return;
             }
@@ -144,11 +130,10 @@ public class ConsumerRouter implements Router {
 
     private String getRouteIndexValue(Invocation invocation) {
         try {
-            String routeId = String.valueOf(invocation.getArguments()[routeIdIndex]);
-            return routeId;
+            return String.valueOf(invocation.getArguments()[routeIdIndex]);
         } catch (Throwable throwable) {
             String msg = MessageFormat.format("service:{0}, error when get routeId in params, routeIdIndex:{1}",
-                servicePrimaryKey, routeIdIndex);
+                    servicePrimaryKey, routeIdIndex);
             throw ExceptionFactory.makeFault(msg, throwable);
         }
     }

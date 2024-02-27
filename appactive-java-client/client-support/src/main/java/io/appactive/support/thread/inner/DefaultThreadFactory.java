@@ -16,12 +16,16 @@
 
 package io.appactive.support.thread.inner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.appactive.support.log.LogUtil;
 
 public class DefaultThreadFactory implements ThreadFactory {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
     private final ThreadGroup group;
@@ -49,12 +53,7 @@ public class DefaultThreadFactory implements ThreadFactory {
             thread.setPriority(Thread.NORM_PRIORITY);
         }
 
-        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable ex) {
-                LogUtil.info("appactive-new-thread-uncaughtException:"+ ex.getMessage());
-            }
-        });
+        thread.setUncaughtExceptionHandler((thread1, ex) -> logger.info("appactive-new-thread-uncaughtException:"+ ex.getMessage()));
 
         return thread;
     }

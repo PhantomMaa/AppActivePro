@@ -17,11 +17,11 @@
 package io.appactive.demo.common.filter;
 
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.support.log.LogUtil;
 import io.appactive.support.sys.JvmPropertyUtil;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChainAspect {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @AfterReturning(pointcut = "execution(* io.appactive.demo.frontend.service.*.*(..))", returning = "result")
     public void afterRunning(Object result) {

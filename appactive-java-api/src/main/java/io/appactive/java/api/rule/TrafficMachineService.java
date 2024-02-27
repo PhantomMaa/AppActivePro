@@ -22,9 +22,9 @@ import io.appactive.java.api.utils.lang.StringUtils;
 
 public class TrafficMachineService {
 
-    private TrafficRouteRuleService trafficRouteRuleService;
+    private final TrafficRouteRuleService trafficRouteRuleService;
 
-    private AbstractMachineUnitRuleService abstractMachineUnitRuleService;
+    private final AbstractMachineUnitRuleService abstractMachineUnitRuleService;
 
     public TrafficMachineService(TrafficRouteRuleService trafficRouteRuleService,
                                  AbstractMachineUnitRuleService abstractMachineUnitRuleService) {
@@ -34,6 +34,7 @@ public class TrafficMachineService {
 
     /**
      * 当前用户是否在当前单元类型下的单元为本单元，仅供外部业务系统使用
+     *
      * @param routeId as it is
      * @return as explained above
      */
@@ -41,7 +42,7 @@ public class TrafficMachineService {
         String unitByRouteId = trafficRouteRuleService.getUnitByRouteId(routeId);
         String currentUnit = abstractMachineUnitRuleService.getCurrentUnit();
         return StringUtils.isNotBlank(currentUnit) && StringUtils.isNotBlank(unitByRouteId) && unitByRouteId
-            .equalsIgnoreCase(currentUnit);
+                .equalsIgnoreCase(currentUnit);
 
     }
 }

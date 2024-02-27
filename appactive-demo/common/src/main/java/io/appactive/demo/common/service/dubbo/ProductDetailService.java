@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package io.appactive.java.api.base.constants;
+package io.appactive.demo.common.service.dubbo;
 
-/**
- * used in rpc/mq/db... resource
- */
-public interface ResourceActiveType {
-    /**
-     * type: unit
-     */
-    String UNIT_RESOURCE_TYPE = "unit";
+import io.appactive.demo.common.entity.Product;
+import io.appactive.demo.common.entity.ResultHolder;
+
+import java.util.List;
+
+public interface ProductDetailService {
 
     /**
-     * value
+     * 商品详情
+     *
+     * @param rId
+     * @param pId
+     * @return
      */
-    String CENTER_RESOURCE_TYPE = "center";
+    ResultHolder<Product> detail(String rId, String pId);
+
 }

@@ -41,9 +41,12 @@ import io.appactive.java.api.rule.traffic.bo.IdSourceRule;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rule.ClientRuleService;
 import io.appactive.support.lang.CollectionUtils;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestFilter implements Filter, ServletService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final Map<IdSourceEnum, BiFunction<HttpServletRequest, String, String>> STRATEGY_MAP = new HashMap<>();
 
@@ -57,7 +60,7 @@ public class RequestFilter implements Filter, ServletService {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        LogUtil.info("appactive-request-init");
+        logger.info("appactive-request-init");
         IdSourceRuleService idSourceRuleService = ClientRuleService.getIdSourceRuleService();
         if (idSourceRuleService == null) {
             throw ExceptionFactory.makeFault("idSourceRuleService is null");
@@ -80,7 +83,7 @@ public class RequestFilter implements Filter, ServletService {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         IdSourceEnum idSourceEnum = getRawRouterIdSuccess(ID_SOURCE_RULE, httpRequest);
         if (idSourceEnum != null) {
-            LogUtil.info(AppactiveConstant.PROJECT_NAME + "-request-doFilter-" + idSourceEnum + ":" + AppContextClient.getRouteId());
+            logger.info(AppactiveConstant.PROJECT_NAME + "-request-doFilter-" + idSourceEnum + ":" + AppContextClient.getRouteId());
             chain.doFilter(request, response);
             clear();
             return;
@@ -100,7 +103,7 @@ public class RequestFilter implements Filter, ServletService {
         for (IdSourceEnum idSourceEnum : sourceList) {
             BiFunction<HttpServletRequest, String, String> func = STRATEGY_MAP.get(idSourceEnum);
             if (func == null) {
-                LogUtil.warn(AppactiveConstant.PROJECT_NAME + "-no-such-handler:" + idSourceEnum);
+                logger.warn(AppactiveConstant.PROJECT_NAME + "-no-such-handler:" + idSourceEnum);
                 continue;
             }
             String routeId = func.apply(request, idSourceRule.getTokenKey());
@@ -121,7 +124,7 @@ public class RequestFilter implements Filter, ServletService {
 
     @Override
     public void destroy() {
-        LogUtil.info(AppactiveConstant.PROJECT_NAME + "-request-destroy");
+        logger.info(AppactiveConstant.PROJECT_NAME + "-request-destroy");
     }
 
 }

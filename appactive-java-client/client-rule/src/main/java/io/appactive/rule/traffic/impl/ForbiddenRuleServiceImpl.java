@@ -32,15 +32,18 @@ import io.appactive.rule.traffic.condition.ConditionUtil;
 import io.appactive.rule.traffic.condition.RuleCondition;
 import io.appactive.rule.traffic.impl.base.BaseRuleService;
 import io.appactive.support.lang.CollectionUtils;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForbiddenRuleServiceImpl extends BaseRuleService implements ForbiddenRuleService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private TransformerRuleService transformerRuleService;
 
     @Override
     public boolean isRouteIdForbidden(String routeId) {
-        if (CollectionUtils.isEmpty(memoryConditions)){
+        if (CollectionUtils.isEmpty(memoryConditions)) {
             // no rule, no forbidding
             return false;
         }
@@ -78,22 +81,22 @@ public class ForbiddenRuleServiceImpl extends BaseRuleService implements Forbidd
     private final DataListener<UnitMappingRuleBO> listener = new DataListener<UnitMappingRuleBO>() {
         @Override
         public String getListenerName() {
-            return "ForbiddenRule-Listener-"+this.hashCode();
+            return "ForbiddenRule-Listener-" + this.hashCode();
         }
 
         @Override
-        public void dataChanged(UnitMappingRuleBO old,UnitMappingRuleBO unitMappingRule) {
+        public void dataChanged(UnitMappingRuleBO old, UnitMappingRuleBO unitMappingRule) {
             if (!checkRule(unitMappingRule)) {
-                LogUtil.error("forbidden rule error,not change memory value,data:"+ JSON.toJSONString(unitMappingRule));
+                logger.error("forbidden rule error,not change memory value,data:" + JSON.toJSONString(unitMappingRule));
                 return;
             }
-            if (unitMappingRule == null){
+            if (unitMappingRule == null) {
                 return;
             }
             Map<String, List<RuleCondition>> unitConditionMap = ConditionUtil.getUnitConditionMap(unitMappingRule);
-            if (unitConditionMap.size()==0){
+            if (unitConditionMap.isEmpty()) {
                 memoryConditions = null;
-            }else {
+            } else {
                 memoryConditions = unitConditionMap.values().iterator().next();
             }
         }

@@ -22,13 +22,13 @@ import java.util.Objects;
 
 public class AddressActive<T> {
 
-    private String resourceType;
+    private final String resourceType;
 
-    private List<T> originalList;
+    private final List<T> originalList;
 
-    private Map<String, List<T>> unitServersMap;
+    private final Map<String, List<T>> unitServersMap;
 
-    public AddressActive(String resourceType, Map<String, List<T>> unitServersMap,List<T> originalList) {
+    public AddressActive(String resourceType, Map<String, List<T>> unitServersMap, List<T> originalList) {
         this.resourceType = resourceType;
         this.unitServersMap = unitServersMap;
         this.originalList = originalList;
@@ -48,11 +48,15 @@ public class AddressActive<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
-        AddressActive<?> that = (AddressActive<?>)o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AddressActive<?> that = (AddressActive<?>) o;
         return Objects.equals(resourceType, that.resourceType) && Objects.equals(originalList,
-            that.originalList) && Objects.equals(unitServersMap, that.unitServersMap);
+                that.originalList) && Objects.equals(unitServersMap, that.unitServersMap);
     }
 
     @Override
@@ -63,9 +67,9 @@ public class AddressActive<T> {
     @Override
     public String toString() {
         return "AddressActive{" +
-            "resourceType='" + resourceType + '\'' +
-            ", originalList=" + originalList +
-            ", unitServersMap=" + unitServersMap +
-            '}';
+                "resourceType='" + resourceType + '\'' +
+                ", originalList=" + originalList +
+                ", unitServersMap=" + unitServersMap +
+                '}';
     }
 }

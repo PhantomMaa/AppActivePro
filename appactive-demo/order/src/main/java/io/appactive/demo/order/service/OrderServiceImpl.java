@@ -20,9 +20,9 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.demo.order.repository.ProductRepository;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,7 +32,7 @@ import java.util.Optional;
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "unit", "routeIndex", "0"})
 public class OrderServiceImpl implements OrderService {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     ProductRepository productRepository;

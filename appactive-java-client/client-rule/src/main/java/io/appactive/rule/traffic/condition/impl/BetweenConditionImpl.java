@@ -16,23 +16,20 @@
 
 package io.appactive.rule.traffic.condition.impl;
 
+import io.appactive.java.api.base.exception.ExceptionFactory;
+import io.appactive.java.api.utils.lang.StringUtils;
+import io.appactive.rule.traffic.condition.ConditionType;
+import io.appactive.rule.traffic.condition.RuleCondition;
+import io.appactive.rule.traffic.condition.impl.between.NumTokenRange;
+import io.appactive.support.lang.AssertUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.appactive.java.api.base.exception.ExceptionFactory;
-import io.appactive.java.api.utils.lang.StringUtils;
-import io.appactive.support.lang.AssertUtil;
-import io.appactive.support.log.LogUtil;
-import io.appactive.rule.traffic.condition.ConditionType;
-import io.appactive.rule.traffic.condition.RuleCondition;
-import io.appactive.rule.traffic.condition.impl.between.NumTokenRange;
-import org.slf4j.Logger;
-
 public class BetweenConditionImpl implements RuleCondition {
 
-    private static final Logger logger = LogUtil.getLogger();
 
     public static final Pattern RANGE_PATTER = Pattern.compile("(\\d+)~(\\d+)");
 

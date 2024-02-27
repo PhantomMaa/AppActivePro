@@ -30,11 +30,11 @@ public class Dubbo2AddressCallBack<T> implements RPCAddressCallBack<Invoker<T>> 
 
     @Override
     public String getMetaMapValue(Invoker<T> server, String key) {
-        if (server == null){
+        if (server == null) {
             return null;
         }
         URL url = server.getUrl();
-        if (url == null){
+        if (url == null) {
             return null;
         }
         return url.getParameter(key);
@@ -42,11 +42,11 @@ public class Dubbo2AddressCallBack<T> implements RPCAddressCallBack<Invoker<T>> 
 
     @Override
     public String getServerToString(Invoker<T> server) {
-        if (server == null){
+        if (server == null) {
             return null;
         }
         URL url = server.getUrl();
-        if (url == null){
+        if (url == null) {
             return null;
         }
         return url.getAddress();
@@ -67,7 +67,7 @@ public class Dubbo2AddressCallBack<T> implements RPCAddressCallBack<Invoker<T>> 
 
         List<RPCInvokerBO<Invoker<T>>> invokerBOS = new ArrayList<>();
 
-        for(Invoker<T> invoker:invokers){
+        for (Invoker<T> invoker : invokers) {
             RPCInvokerBO<Invoker<T>> rpcInvokerBO = new RPCInvokerBO<Invoker<T>>();
             rpcInvokerBO.setOriginalValue(invoker);
 
@@ -75,8 +75,8 @@ public class Dubbo2AddressCallBack<T> implements RPCAddressCallBack<Invoker<T>> 
             String host = invoker.getUrl().getHost();
             int port = invoker.getUrl().getPort();
             Map<String, String> defaultMetaMap = new HashMap<>(parameters);
-            defaultMetaMap.put("host",String.valueOf(host));
-            defaultMetaMap.put("port",String.valueOf(port));
+            defaultMetaMap.put("host", String.valueOf(host));
+            defaultMetaMap.put("port", String.valueOf(port));
             rpcInvokerBO.setDefaultMetaMap(defaultMetaMap);
             invokerBOS.add(rpcInvokerBO);
         }
@@ -85,7 +85,7 @@ public class Dubbo2AddressCallBack<T> implements RPCAddressCallBack<Invoker<T>> 
 
     private List<Invoker<T>> toOriginalInvokerList(List<RPCInvokerBO<Invoker<T>>> rpcInvokerBOS) {
         ArrayList<Invoker<T>> invokers = new ArrayList();
-        if (rpcInvokerBOS == null){
+        if (rpcInvokerBOS == null) {
             return invokers;
         }
         for (RPCInvokerBO<Invoker<T>> rpcInvokerBO : rpcInvokerBOS) {

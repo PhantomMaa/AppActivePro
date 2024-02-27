@@ -19,8 +19,6 @@ package io.appactive.java.api.bridge.rpc.constants.constant;
 
 public interface RPCConstant {
 
-
-
     /**
      * auto by machine
      * url：unit label
@@ -42,11 +40,11 @@ public interface RPCConstant {
      * get route Id by params, if notExit, use thread
      */
     String URL_ROUTE_INDEX_KEY = "ri";
+
     String URL_ROUTE_INDEX = "routeIndex";
 
     String CONSUMER_REMOTE_ROUTE_ID_KEY = "_unit_rpc_route_id";
 
-    String SPRING_CLOUD_SERVICE_META = "svc_meta";
     String SPRING_CLOUD_SERVICE_META_VERSION = "svc_meta_v";
 
 }

@@ -1,6 +1,6 @@
 - [ ]  下订单流程，写 order 表
 - [ ]  将 sharding-proxy 整合进来
-- [ ]  购买按钮传递正确的itemID
+- [ ]  购买按钮传递正确的 itemID
 - [ ]  服务间调用，遵循单元内优先的原则
 - [ ]  页面上显示出来数据库
-- [ ]  docker-compose的方式，分别启动两个 mysql
+- [ ]  docker-compose 的方式，分别启动两个 mysql

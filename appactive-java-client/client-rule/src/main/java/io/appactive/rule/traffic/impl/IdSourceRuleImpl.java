@@ -27,12 +27,15 @@ import io.appactive.java.api.rule.traffic.IdSourceRuleService;
 import io.appactive.java.api.rule.traffic.bo.IdSourceEnum;
 import io.appactive.java.api.rule.traffic.bo.IdSourceRule;
 import io.appactive.rule.ClientRuleService;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class IdSourceRuleImpl implements IdSourceRuleService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private IdSourceRule idSourceRule;
 
@@ -67,7 +70,7 @@ public class IdSourceRuleImpl implements IdSourceRuleService {
             idSourceRule = readDataSource.read();
         } catch (Exception e) {
             String msg = "initFromUri exception:" + e.getMessage();
-            LogUtil.error(msg,e);
+            logger.error(msg,e);
             throw ExceptionFactory.makeFault(msg);
         }
     }

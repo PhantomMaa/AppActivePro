@@ -25,7 +25,8 @@ import io.appactive.java.api.channel.ConfigReadDataSource;
 import io.appactive.java.api.channel.ConverterInterface;
 import io.appactive.java.api.channel.listener.DataListener;
 import io.appactive.java.api.utils.lang.StringUtils;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final ConverterInterface<String, T> converterInterface;
 
@@ -72,7 +75,7 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
                 @Override
                 public void receiveConfigInfo(String configInfo) {
                     lastModified = System.currentTimeMillis();
-                    LogUtil.warn("get Nacos configInfo {}", configInfo);
+                    logger.warn("get Nacos configInfo {}", configInfo);
                     initMemoryValue(converterInterface.convert(configInfo));
                 }
 
@@ -82,7 +85,7 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
                 }
             });
         } catch (NacosException e) {
-            LogUtil.error("get Nacos configService Exception ", e);
+            logger.error("get Nacos configService Exception ", e);
         }
     }
 
@@ -99,7 +102,7 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
             listenerNotify(oldValue, newValue);
             memoryValue = newValue;
         } catch (IOException e) {
-            LogUtil.error("nacos-read-failed,e:" + e.getMessage(), e);
+            logger.error("nacos-read-failed,e:" + e.getMessage(), e);
         }
     }
 
@@ -141,7 +144,7 @@ public class NacosReadDataSource<T> implements ConfigReadDataSource<T> {
 
             return converterInterface.convert(content);
         } catch (NacosException e) {
-            LogUtil.warn("getValueFromSource serverAddr: {}, namespaceId: {}, dataId: {}, groupId: {}, Exception ",
+            logger.warn("getValueFromSource serverAddr: {}, namespaceId: {}, dataId: {}, groupId: {}, Exception ",
                     serverAddr, namespaceId, dataId, groupId, e);
             return null;
         }

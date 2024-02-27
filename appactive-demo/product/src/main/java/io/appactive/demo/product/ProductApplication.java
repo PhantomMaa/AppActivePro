@@ -18,10 +18,11 @@ package io.appactive.demo.product;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.dubbo.ProductService;
+import io.appactive.demo.common.service.dubbo.ProductDetailService;
+import io.appactive.demo.common.service.dubbo.ProductListService;
 import io.appactive.java.api.base.AppContextClient;
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -43,29 +44,25 @@ import java.util.List;
 @Controller("/")
 public class ProductApplication {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static void main(String[] args) {
         SpringApplication.run(ProductApplication.class, args);
     }
 
     @Resource
-    private ProductService productService;
+    private ProductDetailService productDetailService;
+
+    @Resource
+    private ProductListService productListService;
 
     @Value("${spring.application.name}")
     private String appName;
 
-    @RequestMapping("/echo")
-    @ResponseBody
-    public String echo(@RequestParam(required = false, defaultValue = "jack") String user) {
-        String s = String.valueOf(user);
-        return String.format("%s get %s", s, productService.list().toString());
-    }
-
     @RequestMapping("/list")
     @ResponseBody
     public ResultHolder<List<Product>> list() {
-        return productService.list();
+        return productListService.list();
     }
 
 
@@ -74,7 +71,7 @@ public class ProductApplication {
     public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String rId,
                                         @RequestParam(required = false, defaultValue = "12") String pId) {
         logger.info("detail, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
-        return productService.detail(rId, pId);
+        return productDetailService.detail(rId, pId);
     }
 
     @RequestMapping("/check")

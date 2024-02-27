@@ -21,8 +21,8 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.frontend.service.FrontendManager;
 import io.appactive.java.api.base.AppContextClient;
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -38,7 +38,7 @@ import java.util.Map;
 @Controller("/")
 public class FrontController {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     private FrontendManager frontendManager;
@@ -120,6 +120,19 @@ public class FrontController {
         model.addAttribute("current", "detailProduct");
         logger.info("chain : {}", chain);
         return "detail.html";
+    }
+
+
+    @GetMapping(value = "/manageProduct")
+    public String manageProduct(@RequestParam(required = false, defaultValue = "12") String id, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), id);
+        String chain = JSON.toJSONString(resultHolder.getChain());
+        model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
+        model.addAttribute("product", resultHolder.getResult());
+        model.addAttribute("chain", JSON.toJSONString(resultHolder.getChain()));
+        model.addAttribute("current", "manageProduct");
+        logger.info("chain : {}", chain);
+        return "manage.html";
     }
 
     @RequestMapping("/decrease")

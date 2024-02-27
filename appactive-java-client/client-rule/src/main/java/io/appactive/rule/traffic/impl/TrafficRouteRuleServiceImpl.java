@@ -34,9 +34,13 @@ import io.appactive.rule.traffic.bo.UnitMappingRuleBO;
 import io.appactive.rule.traffic.condition.ConditionUtil;
 import io.appactive.rule.traffic.condition.RuleCondition;
 import io.appactive.rule.traffic.impl.base.BaseRuleService;
-import io.appactive.support.log.LogUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TrafficRouteRuleServiceImpl extends BaseRuleService implements TrafficRouteRuleService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private TransformerRuleService transformerRuleService;
 
@@ -91,7 +95,7 @@ public class TrafficRouteRuleServiceImpl extends BaseRuleService implements Traf
         @Override
         public void dataChanged(UnitMappingRuleBO old,UnitMappingRuleBO unitMappingRule) {
             if (!checkRule(unitMappingRule)) {
-                LogUtil.error("forbidden rule error,not change memory value,data:"+ JSON.toJSONString(unitMappingRule));
+                logger.error("forbidden rule error,not change memory value,data:"+ JSON.toJSONString(unitMappingRule));
                 return;
             }
             if (unitMappingRule == null){
@@ -104,7 +108,7 @@ public class TrafficRouteRuleServiceImpl extends BaseRuleService implements Traf
                 List<RuleCondition> ruleConditions = entry.getValue();
                 for (RuleCondition ruleCondition : ruleConditions) {
                     int priority = ruleCondition.priority();
-                    TrafficCondition trafficCondition = new TrafficCondition(unitFlag,ruleCondition,priority);
+                    TrafficCondition trafficCondition = new TrafficCondition(unitFlag, ruleCondition, priority);
                     trafficConditions.add(trafficCondition);
                 }
             }
@@ -122,10 +126,10 @@ public class TrafficRouteRuleServiceImpl extends BaseRuleService implements Traf
 
 
 
-    class TrafficCondition {
-        private String unitFlag;
-        private RuleCondition condition;
-        private int priority;
+    static class TrafficCondition {
+        private final String unitFlag;
+        private final RuleCondition condition;
+        private final int priority;
 
         public TrafficCondition(String unitFlag, RuleCondition condition, int priority) {
             this.unitFlag = unitFlag;

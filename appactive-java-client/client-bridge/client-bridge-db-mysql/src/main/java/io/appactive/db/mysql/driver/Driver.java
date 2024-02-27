@@ -24,9 +24,9 @@ import java.util.Properties;
 import io.appactive.db.mysql.utils.SQLCacheCheckUtil;
 import io.appactive.java.api.bridge.db.connection.MysqlConnectionService;
 import io.appactive.java.api.bridge.db.driver.MysqlDriverService;
-import io.appactive.support.log.LogUtil;
 import io.appactive.support.spi.SpiUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <pre>
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
  */
 public class Driver implements java.sql.Driver, MysqlDriverService {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final static Logger logger = LoggerFactory.getLogger(Driver.class);
 
     private static final String MYSQL_DRIVER_NAME_5 = "com.mysql.jdbc.NonRegisteringDriver";
 

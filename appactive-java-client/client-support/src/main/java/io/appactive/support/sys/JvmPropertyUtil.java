@@ -21,10 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.appactive.java.api.base.constants.AppactiveConstant;
 import io.appactive.java.api.utils.lang.StringUtils;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JvmPropertyUtil {
 
+    private final static Logger logger = LoggerFactory.getLogger(JvmPropertyUtil.class);
 
     public static String getJvmValue(String key) {
         return getValueFromJVM(key);
@@ -61,7 +63,7 @@ public class JvmPropertyUtil {
         try {
             return Boolean.valueOf(jvmAndEnvValue);
         } catch (Exception e) {
-            LogUtil.info("Boolean.valueOf({}) false,e:{},use default value:{}", jvmAndEnvValue, e.getMessage(),
+            logger.info("Boolean.valueOf({}) false,e:{},use default value:{}", jvmAndEnvValue, e.getMessage(),
                 defaultValue);
             return defaultValue;
         }
@@ -101,16 +103,16 @@ public class JvmPropertyUtil {
         if (StringUtils.isNotBlank(property)) {
             // 第一优先级生效
             APP_NAME = StringUtils.trim(property);
-            LogUtil.info(appNameKey+":" + APP_NAME);
+            logger.info(appNameKey+":" + APP_NAME);
             return;
         }
         if (StringUtils.isNotBlank(projectName)) {
             // 第2优先级生效
             APP_NAME = StringUtils.trim(projectName);
-            LogUtil.info("[project.name]app.name:" + APP_NAME);
+            logger.info("[project.name]app.name:" + APP_NAME);
             return;
         }
-        LogUtil.info("[no-jvm-property]app.name:" + APP_NAME);
+        logger.info("[no-jvm-property]app.name:" + APP_NAME);
     }
 
     private static void initTestCase() {
@@ -118,34 +120,36 @@ public class JvmPropertyUtil {
         if (StringUtils.isNotBlank(property)) {
             TEST_CASE_START = Boolean.valueOf(property);
         }
-        LogUtil.info("test.case.start:" + TEST_CASE_START);
+        logger.info("test.case.start:" + TEST_CASE_START);
     }
 
     private static String getValueFromJVM(String key) {
         if (StringUtils.isEmpty(key)) {
-            LogUtil.debug("getValueFromJVM by key[null] successful,return:null");
+            logger.debug("getValueFromJVM by key[null] successful,return:null");
             return null;
         }
+
         String value = JVM_MEM_MAP.get(key);
         if (value == null) {
             // 内存无值， 设置值 放入内存
             value = System.getProperty(key, AppactiveConstant.EMPTY_STRING);
             JVM_MEM_MAP.put(key, value);
-            LogUtil.debug("key[{}] not in mem,put it, value:{}", key, value);
+            logger.debug("key[{}] not in mem,put it, value:{}", key, value);
         }
 
         if (value.equals(AppactiveConstant.EMPTY_STRING)) {
             // 无值
-            LogUtil.debug("getValueFromJVM by key[{}],it is empty, return:null", key);
+            logger.debug("getValueFromJVM by key[{}],it is empty, return:null", key);
             return null;
         }
-        LogUtil.debug("getValueFromJVM by key[{}],return:{}", key, value);
+
+        logger.debug("getValueFromJVM by key[{}],return:{}", key, value);
         return value;
     }
 
     private static String getValueFromEnv(String key) {
         if (StringUtils.isEmpty(key)) {
-            LogUtil.debug("getValueFromEnv by key[null] successful,return:null");
+            logger.debug("getValueFromEnv by key[null] successful,return:null");
             return null;
         }
         String value = ENV_MEM_MAP.get(key);
@@ -156,15 +160,15 @@ public class JvmPropertyUtil {
                 value = AppactiveConstant.EMPTY_STRING;
             }
             ENV_MEM_MAP.put(key, value);
-            LogUtil.debug("getValueFromEnv key[{}] not in mem,put it, value:{}", key, value);
+            logger.debug("getValueFromEnv key[{}] not in mem,put it, value:{}", key, value);
         }
 
         if (value.equals(AppactiveConstant.EMPTY_STRING)) {
             // 无值
-            LogUtil.debug("getValueFromEnv by key[{}],it is empty, return:null", key);
+            logger.debug("getValueFromEnv by key[{}],it is empty, return:null", key);
             return null;
         }
-        LogUtil.debug("getValueFromEnv by key[{}],return:{}", key, value);
+        logger.debug("getValueFromEnv by key[{}],return:{}", key, value);
         return value;
     }
 

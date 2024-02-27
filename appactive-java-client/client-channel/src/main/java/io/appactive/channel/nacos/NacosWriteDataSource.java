@@ -23,33 +23,23 @@ import com.alibaba.nacos.api.config.ConfigType;
 import com.alibaba.nacos.api.exception.NacosException;
 import io.appactive.java.api.channel.ConfigWriteDataSource;
 import io.appactive.java.api.channel.ConverterInterface;
-import io.appactive.java.api.channel.listener.DataListener;
-import io.appactive.support.log.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class NacosWriteDataSource<T> implements ConfigWriteDataSource<T> {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final ConverterInterface<T, String> converterInterface;
 
-    private List<DataListener<T>> dataListeners = new ArrayList<>();
-
-    private String serverAddr;
-    private String dataId;
-    private String groupId;
-    private String namespaceId;
+    private final String serverAddr;
+    private final String dataId;
+    private final String groupId;
+    private final String namespaceId;
 
     private ConfigService configService;
-
-    /**
-     * TimeUnit.MILLISECONDS
-     */
-    private long timerPeriod = 3000L;
-    private T memoryValue = null;
-    private long lastModified = 0L;
-    private long curLastModified = -1L;
 
     public NacosWriteDataSource(String serverAddr, String dataId, String groupId, ConverterInterface<T, String> converterInterface) {
         this(serverAddr,dataId,groupId,"", converterInterface);
@@ -72,7 +62,7 @@ public class NacosWriteDataSource<T> implements ConfigWriteDataSource<T> {
             properties.put(PropertyKeyConst.NAMESPACE, namespaceId);
             configService = NacosFactory.createConfigService(properties);
         } catch (NacosException e) {
-            LogUtil.error("get Nacos configService Exception ", e);
+            logger.error("get Nacos configService Exception ", e);
         }
     }
 
@@ -86,12 +76,12 @@ public class NacosWriteDataSource<T> implements ConfigWriteDataSource<T> {
         return syncWriteNacos(value,type);
     }
 
-    private boolean syncWriteNacos(T value, String type) throws Exception {
+    private boolean syncWriteNacos(T value, String type) {
         try {
             String convertResult = converterInterface.convert(value);
             return configService.publishConfig(dataId, groupId, convertResult, type);
         }catch (Exception e){
-            LogUtil.error("write Nacos config Exception ", e);
+            logger.error("write Nacos config Exception ", e);
         }
         return false;
     }

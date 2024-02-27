@@ -17,10 +17,10 @@
 package io.appactive.demo.common.filter;
 
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * dubbo filter 机制，拦截 dubbo 接口方法
@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 @Activate
 public class ChainFilter implements Filter {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @SuppressWarnings("rawtypes")
     @Override

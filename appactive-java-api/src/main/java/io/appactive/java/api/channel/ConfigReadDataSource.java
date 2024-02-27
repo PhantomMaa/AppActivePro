@@ -33,7 +33,6 @@ public interface ConfigReadDataSource<T> {
 
     default void listenerNotify(T oldValue,T newValue){
         for (DataListener<T> dataListener : getDataListeners()) {
-            /// for debug
             // String listenerName = dataListener.getListenerName();
             dataListener.dataChanged(oldValue,newValue);
         }

@@ -16,9 +16,6 @@
 
 package io.appactive.rpc.apache.dubbo2.provider;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.appactive.java.api.base.constants.ResourceActiveType;
 import io.appactive.java.api.bridge.rpc.constants.constant.RPCConstant;
 import io.appactive.java.api.bridge.rpc.provider.RPCProviderInitService;
@@ -26,17 +23,22 @@ import io.appactive.java.api.rule.machine.AbstractMachineUnitRuleService;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rule.ClientRuleService;
 import io.appactive.support.lang.CollectionUtils;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.config.ConfigInitializer;
 import org.apache.dubbo.config.ServiceConfig;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER;
 
 @Activate(group = PROVIDER, order = 200)
 public class ProviderInitializer implements ConfigInitializer, RPCProviderInitService<Map<String, String>> {
-    private static final Logger logger = LogUtil.getLogger();
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     private final AbstractMachineUnitRuleService machineUnitRuleService = ClientRuleService.getMachineUnitRuleService();
 
@@ -52,7 +54,7 @@ public class ProviderInitializer implements ConfigInitializer, RPCProviderInitSe
         if (parameters == null){
             // 针对普通服务的修正
             parameters = new HashMap<>(2);
-            parameters.put(RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY, ResourceActiveType.NORMAL_RESOURCE_TYPE);
+            parameters.put(RPCConstant.URL_RESOURCE_ACTIVE_LABEL_KEY, ResourceActiveType.CENTER_RESOURCE_TYPE);
             parameters.put(RPCConstant.URL_UNIT_LABEL_KEY, machineUnitRuleService.getCurrentUnit());
             serviceConfig.setParameters(parameters);
             return;
@@ -63,7 +65,7 @@ public class ProviderInitializer implements ConfigInitializer, RPCProviderInitSe
         addRouteIndexAttribute(parameters);
         addResourceTypeAttribute(parameters);
         // 2. 默认暂不往全局注册，后续控制功能开源后，再加进来
-        logger.info("init-refer:{}", parameters.toString());
+        logger.info("init-refer:{}", parameters);
     }
 
     @Override

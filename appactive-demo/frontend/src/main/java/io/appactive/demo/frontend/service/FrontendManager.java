@@ -20,11 +20,12 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.InventoryService;
 import io.appactive.demo.common.service.dubbo.OrderService;
-import io.appactive.demo.common.service.dubbo.ProductService;
+import io.appactive.demo.common.service.dubbo.ProductDetailService;
+import io.appactive.demo.common.service.dubbo.ProductListService;
 import io.appactive.java.api.base.AppContextClient;
-import io.appactive.support.log.LogUtil;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,10 +33,13 @@ import java.util.List;
 @Service
 public class FrontendManager {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
-    private ProductService productService;
+    private ProductDetailService productDetailService;
+
+    @DubboReference(version = "1.0.0", group = "appactive", check = false)
+    private ProductListService productListService;
 
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
     private OrderService orderService;
@@ -44,11 +48,11 @@ public class FrontendManager {
     private InventoryService inventoryService;
 
     public ResultHolder<List<Product>> list() {
-        return productService.list();
+        return productListService.list();
     }
 
     public ResultHolder<Product> detail(String rId, String pId) {
-        return productService.detail(rId, pId);
+        return productDetailService.detail(rId, pId);
     }
 
     public ResultHolder<Product> decrease(String pId, int number) {

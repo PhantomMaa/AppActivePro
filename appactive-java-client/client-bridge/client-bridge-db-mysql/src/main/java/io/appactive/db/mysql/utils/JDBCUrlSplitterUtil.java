@@ -17,12 +17,12 @@
 package io.appactive.db.mysql.utils;
 
 
-import io.appactive.support.log.LogUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JDBCUrlSplitterUtil {
 
-    private static final Logger logger = LogUtil.getLogger();
+    private final static Logger logger = LoggerFactory.getLogger(JDBCUrlSplitterUtil.class);
 
     public static JdbcUrlSpiltResult spilt(String jdbcUrl) {
         JdbcUrlSpiltResult result = new JdbcUrlSpiltResult();

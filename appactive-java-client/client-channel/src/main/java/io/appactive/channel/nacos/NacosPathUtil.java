@@ -3,12 +3,15 @@ package io.appactive.channel.nacos;
 import io.appactive.channel.PathUtil;
 import io.appactive.channel.RulePropertyConstant;
 import io.appactive.java.api.utils.lang.StringUtils;
-import io.appactive.support.log.LogUtil;
 import io.appactive.support.sys.JvmPropertyUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class NacosPathUtil implements PathUtil {
+
+    private final static Logger logger = LoggerFactory.getLogger(NacosPathUtil.class);
 
     private static volatile NacosPathUtil instance;
 
@@ -17,7 +20,7 @@ public class NacosPathUtil implements PathUtil {
             synchronized(NacosPathUtil.class) {
                 if (instance == null) {
                     instance = new NacosPathUtil();
-                    LogUtil.warn("instance: {}",instance);
+                    logger.warn("instance: {}",instance);
                 }
             }
         }
@@ -28,7 +31,7 @@ public class NacosPathUtil implements PathUtil {
         try {
             initPathValue();
         } catch (Exception e) {
-            LogUtil.error(e.getMessage(),e);
+            logger.error(e.getMessage(),e);
         }
     }
 

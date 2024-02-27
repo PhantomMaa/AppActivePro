@@ -27,10 +27,15 @@ import io.appactive.java.api.rule.RuleTypeEnum;
 import io.appactive.java.api.rule.traffic.TransformerRuleService;
 import io.appactive.java.api.utils.lang.StringUtils;
 import io.appactive.rule.ClientRuleService;
-import io.appactive.support.log.LogUtil;
 import io.appactive.rule.traffic.bo.TransformerRuleBO;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TransformerRuleServiceImpl implements TransformerRuleService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private TransformerRuleBO transformerRuleBO;
 
@@ -43,15 +48,15 @@ public class TransformerRuleServiceImpl implements TransformerRuleService {
     }
 
     @Override
-    public String getRouteIdAfterTransformer(String routeId){
-        if (StringUtils.isBlank(routeId)){
+    public String getRouteIdAfterTransformer(String routeId) {
+        if (StringUtils.isBlank(routeId)) {
             return routeId;
         }
         Long mod = transformerRuleBO.getMod();
-        if (mod == null){
+        if (mod == null) {
             return routeId;
         }
-        if (StringUtils.isNotNumbers(routeId)){
+        if (StringUtils.isNotNumbers(routeId)) {
             throw ExceptionFactory.makeFault("sourceRouteId is not number");
         }
         Long sourceLangValue = Long.valueOf(routeId);
@@ -62,13 +67,14 @@ public class TransformerRuleServiceImpl implements TransformerRuleService {
 
 
     private void initFromUri(String uri) {
-        ConverterInterface<String, TransformerRuleBO> ruleConverterInterface = (source) -> JSON.parseObject(source,new TypeReference<TransformerRuleBO>() {});
-        ConfigReadDataSource<TransformerRuleBO> fileReadDataSource =  ClientChannelService.getConfigReadDataSource(uri,ruleConverterInterface);
+        ConverterInterface<String, TransformerRuleBO> ruleConverterInterface = (source) -> JSON.parseObject(source, new TypeReference<TransformerRuleBO>() {
+        });
+        ConfigReadDataSource<TransformerRuleBO> fileReadDataSource = ClientChannelService.getConfigReadDataSource(uri, ruleConverterInterface);
         try {
             transformerRuleBO = fileReadDataSource.read();
         } catch (Exception e) {
             String msg = "initFromUri exception:" + e.getMessage();
-            LogUtil.error(msg,e);
+            logger.error(msg, e);
             throw ExceptionFactory.makeFault(msg);
         }
     }
