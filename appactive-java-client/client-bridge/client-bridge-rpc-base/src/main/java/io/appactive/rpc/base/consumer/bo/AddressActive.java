@@ -22,20 +22,20 @@ import java.util.Objects;
 
 public class AddressActive<T> {
 
-    private final String resourceType;
+    private final String resourceActiveType;
 
     private final List<T> originalList;
 
     private final Map<String, List<T>> unitServersMap;
 
-    public AddressActive(String resourceType, Map<String, List<T>> unitServersMap, List<T> originalList) {
-        this.resourceType = resourceType;
+    public AddressActive(String resourceActiveType, Map<String, List<T>> unitServersMap, List<T> originalList) {
+        this.resourceActiveType = resourceActiveType;
         this.unitServersMap = unitServersMap;
         this.originalList = originalList;
     }
 
-    public String getResourceType() {
-        return resourceType;
+    public String getResourceActiveType() {
+        return resourceActiveType;
     }
 
     public Map<String, List<T>> getUnitServersMap() {
@@ -55,19 +55,19 @@ public class AddressActive<T> {
             return false;
         }
         AddressActive<?> that = (AddressActive<?>) o;
-        return Objects.equals(resourceType, that.resourceType) && Objects.equals(originalList,
+        return Objects.equals(resourceActiveType, that.resourceActiveType) && Objects.equals(originalList,
                 that.originalList) && Objects.equals(unitServersMap, that.unitServersMap);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resourceType, originalList, unitServersMap);
+        return Objects.hash(resourceActiveType, originalList, unitServersMap);
     }
 
     @Override
     public String toString() {
         return "AddressActive{" +
-                "resourceType='" + resourceType + '\'' +
+                "resourceType='" + resourceActiveType + '\'' +
                 ", originalList=" + originalList +
                 ", unitServersMap=" + unitServersMap +
                 '}';

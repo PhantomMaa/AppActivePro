@@ -17,26 +17,30 @@
 package io.appactive.java.api.bridge.rpc.constants.constant;
 
 
+import io.appactive.java.api.base.constants.ResourceActiveType;
+
 public interface RPCConstant {
 
     /**
-     * auto by machine
-     * url：unit label
+     * 当前机器所在的单元
      */
     String URL_UNIT_LABEL_KEY = "ut";
 
     /**
-     * manual
+     * rsActive 的别名
      * url: resource active
-     * for example: CENTER_RESOURCE_TYPE/UNIT_RESOURCE_TYPE/NORMAL_RESOURCE_TYPE
      */
     String URL_RESOURCE_ACTIVE_LABEL_KEY = "ra";
 
+    /**
+     * resourceType
+     *
+     * @see ResourceActiveType
+     */
     String URL_RESOURCE_ACTIVE_LABEL = "rsActive";
 
     /**
-     * manual(optional)
-     * url: route index key
+     * routeIndex 的别名
      * get route Id by params, if notExit, use thread
      */
     String URL_ROUTE_INDEX_KEY = "ri";

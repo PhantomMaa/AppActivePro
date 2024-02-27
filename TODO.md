@@ -1,5 +1,6 @@
 - [ ]  下订单流程，写 order 表
 - [ ]  将 sharding-proxy 整合进来
+- [ ]  frontend ConsumerRouter 从 dubbo consumer 侧的 metadata，不能获取到 provider 的 meta 信息（比如，ut、ui），不能初始化 SERVICE_REMOTE_ADDRESS_MAP
 - [ ]  购买按钮传递正确的 itemID
 - [ ]  服务间调用，遵循单元内优先的原则
 - [ ]  页面上显示出来数据库

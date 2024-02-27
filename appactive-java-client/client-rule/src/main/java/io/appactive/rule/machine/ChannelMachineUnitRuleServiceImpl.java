@@ -54,7 +54,6 @@ public class ChannelMachineUnitRuleServiceImpl extends AbstractMachineUnitRuleSe
     private void initFromUri(String uri) {
         ConverterInterface<String, MachineUnitBO> ruleConverterInterface = (source) -> JSON.parseObject(source,new TypeReference<MachineUnitBO>() {});
         ConfigReadDataSource<MachineUnitBO> fileReadDataSource = ClientChannelService.getConfigReadDataSource(uri,ruleConverterInterface);
-        /// error
         // ConfigReadDataSource<MachineUnitBO> fileReadDataSource = ClientChannelService.getConfigReadDataSource(uri);
         fileReadDataSource.addDataChangedListener(listener);
     }

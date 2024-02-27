@@ -47,7 +47,7 @@ public class ConsumerRouter implements Router {
 
     private final TrafficRouteRuleService trafficRouteRuleService = ClientRuleService.getTrafficRouteRuleService();
 
-    private RPCAddressFilterByUnitService addressFilterByUnitService = new RPCAddressFilterByUnitServiceImpl();
+    private final RPCAddressFilterByUnitService addressFilterByUnitService = new RPCAddressFilterByUnitServiceImpl();
 
     private final Dubbo2AddressCallBack callBack = new Dubbo2AddressCallBack();
 
@@ -59,7 +59,7 @@ public class ConsumerRouter implements Router {
         this.url = referenceUrl;
         this.servicePrimaryKey = referenceUrl.getServiceKey();
 
-        logger.info("init-ConsumerUnitRouter, url : {}", url);
+        logger.info("init-ConsumerUnitRouter, servicePrimaryKey : {}", servicePrimaryKey);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ConsumerRouter implements Router {
         }
 
         addressFilterByUnitService.initAddressCallBack(callBack);
-        addressFilterByUnitService.refreshAddressList(servicePrimaryKey, invokers, null, null);
+        addressFilterByUnitService.refreshAddressList(servicePrimaryKey, invokers, null);
     }
 
     private <T> void initRouteIdIndex(List<Invoker<T>> invokers) {
@@ -125,6 +125,7 @@ public class ConsumerRouter implements Router {
                 return;
             }
         }
+
         this.routeIdIndex = -1;
     }
 
