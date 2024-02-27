@@ -19,31 +19,8 @@
 <head th:replace="header.html :: commonHead">
 </head>
 <body>
-<script type="text/javascript">
-    $(window).on('load', function() {
-        $('#resultModal').modal('show');
-    });
-</script>
 <header th:replace="header.html :: pageHeader"></header>
 <div id="welcome-page" class="container">
-    <div class="modal" tabindex="-1" role="dialog" id="resultModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">购买结果</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p th:text="${message}"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row align-items-center m-auto">
         <div class="col m-auto">
             <div class="card m-auto" style="width: 8rem; align-self: center" >
@@ -61,6 +38,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row" style="color: #bd2d31 !important; font-size: large">
+        购买结果：<span class="modal-title" th:text="${message}"></span>
     </div>
 </div>
 <header th:replace="header.html :: pageTraffic"></header>
