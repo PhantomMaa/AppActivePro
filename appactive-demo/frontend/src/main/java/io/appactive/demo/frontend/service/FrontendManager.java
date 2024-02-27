@@ -20,8 +20,8 @@ import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.InventoryService;
 import io.appactive.demo.common.service.dubbo.OrderService;
-import io.appactive.demo.common.service.dubbo.ProductDetailService;
-import io.appactive.demo.common.service.dubbo.ProductListService;
+import io.appactive.demo.common.service.dubbo.ProductCenterService;
+import io.appactive.demo.common.service.dubbo.ProductUnitService;
 import io.appactive.java.api.base.AppContextClient;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
@@ -36,10 +36,10 @@ public class FrontendManager {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
-    private ProductDetailService productDetailService;
+    private ProductCenterService productCenterService;
 
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
-    private ProductListService productListService;
+    private ProductUnitService productUnitService;
 
     @DubboReference(version = "1.0.0", group = "appactive", check = false)
     private OrderService orderService;
@@ -48,11 +48,11 @@ public class FrontendManager {
     private InventoryService inventoryService;
 
     public ResultHolder<List<Product>> list() {
-        return productListService.list();
+        return productUnitService.list();
     }
 
     public ResultHolder<Product> detail(String rId, String pId) {
-        return productDetailService.detail(rId, pId);
+        return productUnitService.detail(rId, pId);
     }
 
     public ResultHolder<Product> decrease(String pId, int number) {

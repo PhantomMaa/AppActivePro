@@ -19,15 +19,15 @@ package io.appactive.demo.common.service.dubbo;
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 
-import java.util.List;
-
-public interface ProductListService {
+public interface ProductCenterService {
 
     /**
-     * 商品列表
+     * 商品上下架
      *
+     * @param rId
+     * @param pId
      * @return
      */
-    ResultHolder<List<Product>> list();
+    ResultHolder<Product> manage(String rId, String pId);
 
 }

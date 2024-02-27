@@ -21,7 +21,14 @@ import io.appactive.demo.common.entity.ResultHolder;
 
 import java.util.List;
 
-public interface ProductDetailService {
+public interface ProductUnitService {
+
+    /**
+     * 商品列表
+     *
+     * @return
+     */
+    ResultHolder<List<Product>> list();
 
     /**
      * 商品详情
@@ -31,5 +38,4 @@ public interface ProductDetailService {
      * @return
      */
     ResultHolder<Product> detail(String rId, String pId);
-
 }

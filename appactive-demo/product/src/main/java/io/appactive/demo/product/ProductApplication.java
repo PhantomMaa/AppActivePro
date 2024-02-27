@@ -18,8 +18,7 @@ package io.appactive.demo.product;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.dubbo.ProductDetailService;
-import io.appactive.demo.common.service.dubbo.ProductListService;
+import io.appactive.demo.common.service.dubbo.ProductUnitService;
 import io.appactive.java.api.base.AppContextClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +50,7 @@ public class ProductApplication {
     }
 
     @Resource
-    private ProductDetailService productDetailService;
-
-    @Resource
-    private ProductListService productListService;
+    private ProductUnitService productUnitService;
 
     @Value("${spring.application.name}")
     private String appName;
@@ -62,7 +58,7 @@ public class ProductApplication {
     @RequestMapping("/list")
     @ResponseBody
     public ResultHolder<List<Product>> list() {
-        return productListService.list();
+        return productUnitService.list();
     }
 
 
@@ -71,7 +67,7 @@ public class ProductApplication {
     public ResultHolder<Product> detail(@RequestParam(required = false, defaultValue = "12") String rId,
                                         @RequestParam(required = false, defaultValue = "12") String pId) {
         logger.info("detail, routerId: {}, pId: {}", AppContextClient.getRouteId(), pId);
-        return productDetailService.detail(rId, pId);
+        return productUnitService.detail(rId, pId);
     }
 
     @RequestMapping("/check")

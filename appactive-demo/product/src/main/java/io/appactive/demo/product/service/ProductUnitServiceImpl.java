@@ -18,17 +18,21 @@ package io.appactive.demo.product.service;
 
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
-import io.appactive.demo.common.service.dubbo.ProductListService;
+import io.appactive.demo.common.service.dubbo.ProductUnitService;
 import io.appactive.demo.product.repository.ProductRepository;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "center", "routeIndex", "0"})
-public class ProductListServiceImpl implements ProductListService {
+@DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "unit", "routeIndex", "0"})
+public class ProductUnitServiceImpl implements ProductUnitService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     ProductRepository productRepository;
@@ -36,6 +40,12 @@ public class ProductListServiceImpl implements ProductListService {
     @Override
     public ResultHolder<List<Product>> list() {
         return ResultHolder.succeed(productRepository.findAll());
+    }
+
+    @Override
+    public ResultHolder<Product> detail(String rId, String pId) {
+        logger.info("detail: " + pId + ",rId " + rId);
+        return ResultHolder.succeed(productRepository.findById(pId).orElse(new Product()));
     }
 
 }
