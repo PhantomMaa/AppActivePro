@@ -26,7 +26,7 @@
                     <img class="card-img-top" th:src="${product.img}">
                     <div class="card-body" th:id="${product.id}">
                         <h5 class="card-title" style="text-align: center">
-                        <a th:href="@{'/detailProduct?id=' + ${product.id}}" th:text="${product.name}"></a>
+                        <a th:href="@{'/detailProduct?pId=' + ${product.id}}" th:text="${product.name}"></a>
                         </h5>
                         <p class="card-text" style="text-align: center" th:text="${product.description}"></p>
                     </div>

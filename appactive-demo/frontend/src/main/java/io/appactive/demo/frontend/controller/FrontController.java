@@ -111,8 +111,8 @@ public class FrontController {
     }
 
     @GetMapping(value = "/detailProduct")
-    public String detailProduct(@RequestParam(required = false, defaultValue = "12") String id, Model model) {
-        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), id);
+    public String detailProduct(@RequestParam(required = false, defaultValue = "12") String pId, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), pId);
         String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("product", resultHolder.getResult());
@@ -124,8 +124,8 @@ public class FrontController {
 
 
     @GetMapping(value = "/manageProduct")
-    public String manageProduct(@RequestParam(required = false, defaultValue = "12") String id, Model model) {
-        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), id);
+    public String manageProduct(@RequestParam(required = false, defaultValue = "12") String pId, Model model) {
+        ResultHolder<Product> resultHolder = frontendManager.detail(AppContextClient.getRouteId(), pId);
         String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("result", JSON.toJSONString(resultHolder.getResult()));
         model.addAttribute("product", resultHolder.getResult());
@@ -136,7 +136,8 @@ public class FrontController {
     }
 
     @RequestMapping("/decrease")
-    public String decrease(@RequestParam(required = false, defaultValue = "12") String pId, @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
+    public String decrease(@RequestParam(required = false, defaultValue = "12") String pId,
+                           @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
         ResultHolder<Product> resultHolder = frontendManager.decrease(pId, number);
         String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("message", resultHolder.getMessage());
@@ -149,7 +150,8 @@ public class FrontController {
 
 
     @RequestMapping("/order")
-    public String order(@RequestParam(required = false, defaultValue = "12") String pId, @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
+    public String order(@RequestParam(required = false, defaultValue = "12") String pId,
+                        @RequestParam(required = false, defaultValue = "1") Integer number, Model model) {
         ResultHolder<Product> resultHolder = frontendManager.order(pId, number);
         String chain = JSON.toJSONString(resultHolder.getChain());
         model.addAttribute("message", resultHolder.getMessage());

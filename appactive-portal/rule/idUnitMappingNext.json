@@ -6,7 +6,7 @@
       "conditions": [
         {
           "@userIdBetween": [
-            "0~2999"
+            "0~1999"
           ]
         }
       ]
@@ -16,7 +16,7 @@
       "conditions": [
         {
           "@userIdBetween": [
-            "3000~9999"
+            "2000~9999"
           ]
         }
       ]
