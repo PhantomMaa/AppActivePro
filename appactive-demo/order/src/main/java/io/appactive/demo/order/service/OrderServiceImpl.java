@@ -16,17 +16,17 @@
 
 package io.appactive.demo.order.service;
 
-import io.appactive.demo.common.entity.Product;
+import io.appactive.demo.common.entity.Order;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
-import io.appactive.demo.order.repository.ProductRepository;
+import io.appactive.demo.order.repository.OrderRepository;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Optional;
+import java.util.Date;
 
 @Service
 @DubboService(version = "1.0.0", group = "appactive", parameters = {"rsActive", "unit", "routeIndex", "0"})
@@ -35,38 +35,26 @@ public class OrderServiceImpl implements OrderService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
-    ProductRepository productRepository;
+    OrderRepository orderRepository;
 
     @Override
-    public ResultHolder<Void> order(String rId, String pId, Integer number) {
+    public ResultHolder<Order> order(String rId, String name, Integer number) {
         try {
-            Optional<Product> op = productRepository.findById(pId);
-            if (!op.isPresent()) {
-                logger.warn("no such product");
-                return ResultHolder.fail("no such product");
+            Order order = new Order();
+            order.setUserId(Long.valueOf(rId));
+            order.setOrderDate(new Date());
+            order.setName(name);
+            order.setStatus("payed");
+            order = orderRepository.save(order);
+            if (order.getOrderId() == null) {
+                logger.warn("save into db fail");
+                return ResultHolder.fail("save into db fail");
             }
 
-            // 扣库存
-            Product p = op.get();
-            int oldNum = p.getNumber();
-            int left = oldNum - number;
-            if (left < 0) {
-                logger.warn("sold out");
-                return ResultHolder.fail("sold out");
-            }
-
-            p.setNumber(left);
-            p = productRepository.save(p);
-            if (p.getNumber() + number != oldNum) {
-                logger.warn("storage not consist");
-                return ResultHolder.fail("storage not consist");
-            } else {
-                return ResultHolder.succeed(null);
-            }
+            return ResultHolder.succeed(order);
         } catch (Throwable e) {
-            String errMessage = e.getCause().getCause().getMessage();
-            logger.warn("exception: {}", errMessage);
-            return ResultHolder.fail(errMessage);
+            logger.warn("order fail", e);
+            return ResultHolder.fail("order fail");
         }
     }
 }

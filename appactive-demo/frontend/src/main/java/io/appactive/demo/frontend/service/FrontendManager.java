@@ -16,6 +16,7 @@
 
 package io.appactive.demo.frontend.service;
 
+import io.appactive.demo.common.entity.Order;
 import io.appactive.demo.common.entity.Product;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.InventoryService;
@@ -75,10 +76,12 @@ public class FrontendManager {
             return resultInventory;
         }
 
-        ResultHolder<Product> resultHolder = new ResultHolder<>();
-        resultHolder.setResult(resultInventory.getResult());
+        Product product = resultInventory.getResult();
 
-        ResultHolder<Void> resultOrder = orderService.order(AppContextClient.getRouteId(), pId, number);
+        ResultHolder<Product> resultHolder = new ResultHolder<>();
+        resultHolder.setResult(product);
+
+        ResultHolder<Order> resultOrder = orderService.order(AppContextClient.getRouteId(), product.getName(), number);
         resultHolder.getChain().addAll(resultOrder.getChain());
         resultHolder.getChain().addAll(resultInventory.getChain());
         if (!resultOrder.getSuccess()) {

@@ -16,9 +16,10 @@
 
 package io.appactive.demo.order.repository;
 
+import io.appactive.demo.common.entity.Order;
 import io.appactive.demo.common.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductRepository extends JpaRepository<Product, String> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
 }

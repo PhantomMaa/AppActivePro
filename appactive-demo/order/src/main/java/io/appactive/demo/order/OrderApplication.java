@@ -16,6 +16,7 @@
 
 package io.appactive.demo.order;
 
+import io.appactive.demo.common.entity.Order;
 import io.appactive.demo.common.entity.ResultHolder;
 import io.appactive.demo.common.service.dubbo.OrderService;
 import io.appactive.java.api.base.AppContextClient;
@@ -53,17 +54,14 @@ public class OrderApplication {
     @Value("${spring.application.name}")
     private String appName;
 
-    /**
-     * buy1 is just for bypassing center service protection
-     */
-    @RequestMapping(value = {"/buy", "/buy1"})
+    @RequestMapping("/buy")
     @ResponseBody
-    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "jack") String rId,
-                                    @RequestParam(required = false, defaultValue = "12") String id,
+    public ResultHolder<String> buy(@RequestParam(required = false, defaultValue = "1000") String rId,
+                                    @RequestParam(required = false, defaultValue = "14") String id,
                                     @RequestParam(required = false, defaultValue = "1") Integer number) {
         String routerId = AppContextClient.getRouteId();
         logger.info("buy, routerId: {}, pid: {}, number: {}", routerId, id, number);
-        ResultHolder<Void> resultHolder = orderService.order(rId, id, number);
+        ResultHolder<Order> resultHolder = orderService.order(rId, id, number);
 
         ResultHolder<String> result = new ResultHolder<>();
         result.setResult(String.format("routerId %s bought %d of item %s, result: %s", routerId, number, id, resultHolder.getResult()));

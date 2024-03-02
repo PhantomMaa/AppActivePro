@@ -160,15 +160,6 @@ nav_order: 3
     # 报错 403 FORBIDDEN "this is not center machine:unit"
     # 被微服务的单元保护拦截了
     ```
-    ```
-    # 绕过微服务保护，直接测试数据库保护功能
-    curl 127.0.0.1:8882/buy1\?r_id=1 
-    {"result":"routerId 1 bought 1 of item 12, result: success","chain":[{"app":"order","unitFlag":"center"}]}%
-    
-    curl 127.0.0.1:8882/buy1\?r_id=4657 
-    {"result":"routerId 4657 bought 1 of item 12, result: machine:unit,traffic:CENTER,not equals","chain":[{"app":"order","unitFlag":"unit"}]}
-    
-    ```
 
 ### Gateway
 

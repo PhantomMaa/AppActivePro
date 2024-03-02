@@ -47,7 +47,6 @@ public class InventoryServiceImpl implements InventoryService {
                 return ResultHolder.fail("no such product");
             }
 
-            // 扣库存
             Product p = op.get();
             int oldNum = p.getNumber();
             int left = oldNum - number;
@@ -56,6 +55,7 @@ public class InventoryServiceImpl implements InventoryService {
                 return new ResultHolder<>(p, false, "sold out");
             }
 
+            // 减库存
             p.setNumber(left);
             p = productRepository.save(p);
             if (p.getNumber() + number != oldNum) {

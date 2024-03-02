@@ -16,6 +16,7 @@
 
 package io.appactive.demo.common.service.dubbo;
 
+import io.appactive.demo.common.entity.Order;
 import io.appactive.demo.common.entity.ResultHolder;
 
 public interface OrderService {
@@ -24,10 +25,10 @@ public interface OrderService {
      * 下订单
      *
      * @param rId
-     * @param pId
+     * @param name
      * @param number
      * @return
      */
-    ResultHolder<Void> order(String rId, String pId, Integer number);
+    ResultHolder<Order> order(String rId, String name, Integer number);
 
 }

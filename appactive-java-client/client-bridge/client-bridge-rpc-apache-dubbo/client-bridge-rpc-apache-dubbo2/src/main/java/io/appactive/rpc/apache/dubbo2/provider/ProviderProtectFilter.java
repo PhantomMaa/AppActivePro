@@ -136,7 +136,6 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
             logger.error(errorMsg);
         }
         if (trafficMachineService.isInCurrentUnit(routeId)) {
-
             AppContextClient.setUnitContext(routeId);
             return null;
         }
@@ -146,22 +145,18 @@ public class ProviderProtectFilter implements Filter, RPCProviderProtectService<
     }
 
     private String getRouteId(ProviderModel providerModel, Invocation invocation) {
-        String routerId;
-
         String routeIdFromParams = getFromParams(providerModel, invocation);
         if (routeIdFromParams != null) {
             return routeIdFromParams;
         }
 
-        // 2.  consumer 透传过来的值
+        // consumer 透传过来的值
         Object uid = invocation.getObjectAttachment((RPCConstant.CONSUMER_REMOTE_ROUTE_ID_KEY));
-        if (uid != null) {
-            routerId = String.valueOf(uid);
-            return routerId;
+        if (uid == null) {
+            return null;
         }
 
-
-        return null;
+        return String.valueOf(uid);
     }
 
     private String getFromParams(ProviderModel providerModel, Invocation invocation) {

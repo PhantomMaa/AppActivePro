@@ -35,7 +35,7 @@ public class ChainFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         Result result = invoker.invoke(invocation);
         Object resultValue = result.getValue();
-        logger.info("resultValue : {}", resultValue.toString());
+        logger.info("resultValue : {}", resultValue == null ? null : resultValue.toString());
 
         if (resultValue instanceof ResultHolder) {
             ResultHolder resultHolder = (ResultHolder) resultValue;

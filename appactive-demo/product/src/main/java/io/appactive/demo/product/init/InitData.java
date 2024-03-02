@@ -40,7 +40,6 @@ public class InitData implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-
         if (!CENTER_FLAG.equals(unit)){
             return;
         }

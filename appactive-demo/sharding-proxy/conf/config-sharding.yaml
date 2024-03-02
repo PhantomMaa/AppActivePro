@@ -15,71 +15,71 @@
 # limitations under the License.
 #
 
-databaseName: product
+databaseName: demo
 
-dataSources:
-  ds_0:
-    url: jdbc:mysql://127.0.0.1:3306/demo_ds_0?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
-    username: root
-    password: demo_appactiive_pw
-    connectionTimeoutMilliseconds: 30000
-    idleTimeoutMilliseconds: 60000
-    maxLifetimeMilliseconds: 1800000
-    maxPoolSize: 50
-    minPoolSize: 1
-  ds_1:
-    url: jdbc:mysql://127.0.0.1:3306/demo_ds_1?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
-    username: root
-    password: demo_appactiive_pw
-    connectionTimeoutMilliseconds: 30000
-    idleTimeoutMilliseconds: 60000
-    maxLifetimeMilliseconds: 1800000
-    maxPoolSize: 50
-    minPoolSize: 1
+#dataSources:
+#  ds_0:
+#    url: jdbc:mysql://mysql:3306/demo_ds_0?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
+#    username: root
+#    password: demo_appactiive_pw
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
+#  ds_1:
+#    url: jdbc:mysql://mysql:3306/demo_ds_1?characterEncoding=utf8&useSSL=true&serverTimezone=GMT
+#    username: root
+#    password: demo_appactiive_pw
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
 
-rules:
-- !SHARDING
-  tables:
-    t_order:
-      actualDataNodes: ds_${0..1}.t_order_${0..1}
-      tableStrategy:
-        standard:
-          shardingColumn: order_id
-          shardingAlgorithmName: t_order_inline
-      keyGenerateStrategy:
-        column: order_id
-        keyGeneratorName: snowflake
-      auditStrategy:
-        auditorNames:
-          - sharding_key_required_auditor
-        allowHintDisable: true
-  bindingTables:
-    - t_order
-  defaultDatabaseStrategy:
-    standard:
-      shardingColumn: user_id
-      shardingAlgorithmName: database_inline
-  defaultTableStrategy:
-    none:
-  defaultAuditStrategy:
-    auditorNames:
-      - sharding_key_required_auditor
-    allowHintDisable: true
-
-  shardingAlgorithms:
-    database_inline:
-      type: INLINE
-      props:
-        algorithm-expression: ds_${user_id % 2}
-    t_order_inline:
-      type: INLINE
-      props:
-        algorithm-expression: t_order_${order_id % 2}
-
-  keyGenerators:
-    snowflake:
-      type: SNOWFLAKE
-
-  auditors:
-    sharding_key_required_auditor:
-      type: DML_SHARDING_CONDITIONS
+#rules:
+#- !SHARDING
+#  tables:
+#    t_order:
+#      actualDataNodes: ds_${0..1}.t_order_${0..1}
+#      tableStrategy:
+#        standard:
+#          shardingColumn: order_id
+#          shardingAlgorithmName: t_order_inline
+#      keyGenerateStrategy:
+#        column: order_id
+#        keyGeneratorName: snowflake
+#      auditStrategy:
+#        auditorNames:
+#          - sharding_key_required_auditor
+#        allowHintDisable: true
+#  bindingTables:
+#    - t_order
+#  defaultDatabaseStrategy:
+#    standard:
+#      shardingColumn: user_id
+#      shardingAlgorithmName: database_inline
+#  defaultTableStrategy:
+#    none:
+#  defaultAuditStrategy:
+#    auditorNames:
+#      - sharding_key_required_auditor
+#    allowHintDisable: true
+#
+#  shardingAlgorithms:
+#    database_inline:
+#      type: INLINE
+#      props:
+#        algorithm-expression: ds_${user_id % 2}
+#    t_order_inline:
+#      type: INLINE
+#      props:
+#        algorithm-expression: t_order_${order_id % 2}
+#
+#  keyGenerators:
+#    snowflake:
+#      type: SNOWFLAKE
+#
+#  auditors:
+#    sharding_key_required_auditor:
+#      type: DML_SHARDING_CONDITIONS
